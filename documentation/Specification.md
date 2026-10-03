@@ -2,7 +2,7 @@
 
 ## 1. Purpose and Scope
 
-A web application that lets dormitory residents report damage or defects, lets janitors pick up and carry out the repair jobs, and lets the dormitory administration control supplies, budget and staffing priorities.
+A web application that lets dormitory residents report damage or defects, lets janitors pick up and carry out the repair jobs, and lets the dormitory administration control supplies and staffing priorities.
 
 **In scope:** report lifecycle, job assignment, time estimation, supply requests, reassignment, notifications. 
 **Out of scope (v1):** payments, inventory of physical stock, billing students for damage, mobile native apps.
@@ -11,18 +11,18 @@ A web application that lets dormitory residents report damage or defects, lets j
 
 - D1. A student belongs to one dormitory and one room. A report is tied to the dormitory, but not necessarily to a room (it may concern a common area, e.g. corridor, bathroom, kitchen, exterior).
 - D2. For now, one job is handled by one janitor at a time.
-- D3. User creation and role assignment follow industry best practices (see section 3.1).
-- D4. One dormitory per deployment; multi-dormitory support is a later extension. The data model should not block it (see section 9).
+- D3. User creation and role assignment follow industry best practices (see section [[#3.1 User Provisioning and Role Assignment]]).
+- D4. One dormitory per deployment; multi-dormitory support is a later extension. The data model should not block it (see section [[#9. Data Model (initial)]]).
 - D5. Notifications are in-app and real time (WebSocket); email is optional and planned for later.
 - D6. Stack: Angular SPA with NgRx, NestJS backend, Passport.js with JWT for authentication.
 
 ## 3. Actors and Roles
 
-|Role|Description|
-|---|---|
-|Student|Resident who reports problems and follows their progress|
-|Janitor|Maintenance worker who accepts and performs jobs|
-|Dormitory Administrator|Manages budget, supplies, priorities and staffing|
+| Role                    | Description                                              |
+| ----------------------- | -------------------------------------------------------- |
+| Student                 | Resident who reports problems and follows their progress |
+| Janitor                 | Maintenance worker who accepts and performs jobs         |
+| Dormitory Administrator | Manages supplies procurement, priorities and staffing    |
 
 Role-based access control (RBAC) is enforced on every endpoint and every UI route.
 
@@ -52,28 +52,27 @@ Role-based access control (RBAC) is enforced on every endpoint and every UI rout
 
 ### 4.2 Janitor
 
-| ID  | Requirement                                                                                                                                        |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| J-1 | Receive a real-time alert when a new report is submitted.                                                                                          |
-| J-2 | Browse the list of open (unassigned) reports, filterable by category, severity, location type and room.                                            |
-| J-3 | Accept a report; it becomes assigned to that janitor and leaves the open list for others. Acceptance must be race-safe (only one janitor can win). |
-| J-4 | Enter a time estimate for the job; may revise it with a reason.                                                                                    |
-| J-5 | Change job status: `Repair in progress`, `Finished`.                                                                                               |
-| J-6 | Create a supply request (item, quantity, justification) linked to a job when supplies are unavailable; job moves to `Waiting for supplies`.        |
-| J-7 | See status of own supply requests and the expected arrival time.                                                                                   |
-| J-8 | Be notified when reassigned to or from a job.                                                                                                      |
+| ID  | Requirement                                                                                                                                              |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| J-1 | Receive a real-time alert when a new report is submitted.                                                                                                |
+| J-2 | Browse the list of unassigned reports, filterable by category, severity, location type and room.                                                         |
+| J-3 | Accept a report; it becomes assigned to that janitor and leaves the unassigned list for others. Acceptance must be race-safe (only one janitor can win). |
+| J-4 | Enter a time estimate for the job; may revise it with a reason.                                                                                          |
+| J-5 | Change job status: `Repair in progress`, `Finished`.                                                                                                     |
+| J-6 | Create a supply request (item, quantity, justification) linked to a job when supplies are unavailable; job moves to `Waiting for supplies`.              |
+| J-7 | See status of own supply requests and the expected arrival time.                                                                                         |
+| J-8 | Be notified when reassigned to or from a job.                                                                                                            |
 
 ### 4.3 Dormitory Administrator
 
-| ID  | Requirement                                                                                                                                                                             |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A-1 | View all reports, jobs, janitors and their current workload.                                                                                                                            |
-| A-2 | Approve or deny a supply request, with a comment; decision is informed by the displayed remaining budget.                                                                               |
-| A-3 | On approval, set the expected supply arrival time.                                                                                                                                      |
-| A-4 | Manage budget: set the budget for a period; approved requests deduct from it.                                                                                                           |
-| A-5 | Reassign a janitor from a lower-priority job to a higher-severity one when all janitors are busy; the affected job returns to the open list (or `Waiting`) and its student is notified. |
-| A-6 | Change a report's priority/severity.                                                                                                                                                    |
-| A-7 | Manage users: create (single/bulk), send activation link, assign role, deactivate, reset access; all actions audit-logged (see 3.1).                                                    |
+| ID  | Requirement                                                                                                                                                                                    |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A-1 | View all reports, jobs, janitors and their current workload.                                                                                                                                   |
+| A-2 | Procures supplies required by the janitor.                                                                                                                                                     |
+| A-3 | Set the expected supply arrival time.                                                                                                                                                          |
+| A-4 | Reassign a janitor from a lower-priority job to a higher-severity one when all janitors are busy; the affected job returns to the unassigned list (or `Waiting`) and its student is notified.  |
+| A-5 | Change a report's priority/severity.                                                                                                                                                           |
+| A-6 | Manage users: create (single/bulk), send activation link, assign role, deactivate, reset access; all actions audit-logged (see 3.1).                                                           |
 
 ## 5. Report Lifecycle
 
@@ -100,9 +99,7 @@ Every transition is recorded with actor, timestamp and optional comment.
 
 ## 6. Supply Request Lifecycle
 
-`Pending` → `Approved` (with arrival time) → `Delivered` `Pending` → `Denied` (with comment)
-
-If denied, the janitor is notified and the job stays blocked until the janitor submits a revised request or the administrator intervenes.
+`Requested` → `Ordered`(with expected arival time)  →  `Delivered`
 
 ## 7. Priority and Reassignment Rules
 
@@ -112,44 +109,121 @@ If denied, the janitor is notified and the job stays blocked until the janitor s
 
 ## 8. Notifications
 
-| Event                          | Recipients                                      |
-| ------------------------------ | ----------------------------------------------- |
-| New report submitted           | All available janitors                          |
-| Report accepted                | Student                                         |
-| Status changed                 | Student                                         |
-| Estimate set or revised        | Student                                         |
-| Supply request created         | Administrator                                   |
-| Supply request approved/denied | Requesting janitor (and student if job delayed) |
-| Janitor reassigned             | Both janitors, affected student                 |
+| Event                   | Recipients                                      |
+| ----------------------- | ----------------------------------------------- |
+| New report submitted    | All available janitors                          |
+| Report accepted         | Student                                         |
+| Status changed          | Student                                         |
+| Estimate set or revised | Student                                         |
+| Supply request created  | Administrator                                   |
+| Supplies ordered        | Requesting janitor (and student if job delayed) |
+| Supplies arived         | Requesting janitor                              |
+| Janitor reassigned      | Janitor, affected student                       |
 
 ## 9. Data Model (initial)
 
-- **User**: id, name, email, passwordHash, role, active, roomNumber (students only, nullable), activatedAt
-- **AuditLog**: id, actorId, action, targetUserId, oldValue, newValue, at
-- **ActivationToken**: id, userId, tokenHash, expiresAt, usedAt
-- **RefreshToken**: id, userId, tokenHash, family, expiresAt, revokedAt
-- **Report**: id, studentId, category, title, description, locationType (own_room | other_room | common_area | exterior), roomNumber (nullable), locationNote, severity, status, createdAt, updatedAt
-- **Job**: id, reportId, janitorId, estimateMinutes, startedAt, finishedAt
-- **ReportEvent**: id, reportId, actorId, fromStatus, toStatus, comment, at
-- **SupplyRequest**: id, jobId, janitorId, item, quantity, justification, status, decisionBy, decisionComment, arrivalAt
-- **Budget**: id, period, totalAmount, remainingAmount
+- **User**: 
+	id, 
+	name, 
+	email, 
+	passwordHash, 
+	role, 
+	active,
+	roomNumber (students only, nullable),
+	activatedAt
+
+- **AuditLog**: 
+	id, 
+	actorId, 
+	action, 
+	targetUserId, 
+	oldValue, 
+	newValue, 
+	at
+
+- **ActivationToken**:
+	id,
+	userId, 
+	tokenHash,
+	expiresAt, 
+	usedAt
+
+- **RefreshToken**:
+	id,
+	userId,
+	tokenHash,
+	family,
+	expiresAt,
+	revokedAt
+
+- **Report**:
+	id,
+	studentId,
+	category,
+	title,
+	description,
+	location (free form description),
+	severity,
+	status,
+	createdAt,
+	updatedAt
+
+- **Job**:
+	id,
+	reportId,
+	janitorId,
+	estimateMinutes,
+	startedAt,
+	finishedAt
+
+- **ReportEvent**:
+	id,
+	reportId,
+	actorId,
+	fromStatus,
+	toStatus,
+	comment,
+	at
+
+- **SupplyRequest**: 
+	id,
+	jobId,
+	janitorId, 
+	item,
+	quantity,
+	justification (optional), 
+	status, 
+	arrivalAt
+
+- **Attachment**:
+	id,
+	reportId,
+	url
+
+- **Notification**:
+	id,
+	userId,
+	type,
+	payload,
+	readAt
+
 - No Dormitory entity in v1 (single dormitory per deployment); a `dormitoryId` column can be added later for multi-dormitory support.
-- **Attachment**: id, reportId, url
-- **Notification**: id, userId, type, payload, readAt
 
-## 10. API Outline (REST + real-time)
+## 10. API endpoints (REST + real-time)
 
-- `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me`
-- `POST /auth/activate`, `POST /auth/password-reset/request`, `POST /auth/password-reset/confirm`
-- `POST /users`, `POST /users/import`, `PATCH /users/:id` (role, active), `POST /users/:id/invite` (admin)
-- `POST /reports`, `GET /reports` (scoped by role), `GET /reports/:id`, `PATCH /reports/:id`
-- `POST /reports/:id/accept` (janitor)
-- `PATCH /jobs/:id` (estimate, status)
-- `POST /jobs/:id/supply-requests`, `GET /supply-requests`
-- `POST /supply-requests/:id/approve`, `POST /supply-requests/:id/deny` (admin)
-- `POST /jobs/:id/reassign` (admin)
-- `GET /budget`, `PUT /budget` (admin)
-- `GET /notifications`, `PATCH /notifications/:id/read`
+######  auth/
+- `POST login`, `POST refresh`, `POST logout`, `GET me`, `POST activate`, `POST password-reset/request`, `POST password-reset/confirm`
+###### users/
+- `POST`, `POST import`, `PATCH :id` (role, active), `POST :id/invite` (admin)
+###### reports/
+- `POST`, `GET` (scoped by role), `GET :id`, `PATCH :id`, `POST :id/accept` (janitor)
+###### jobs/
+- `PATCH :id` (estimate, status), `POST :id/supply-requests`, `POST :id/reassign` (admin)
+###### supply-requests
+- `GET /supply-requests`
+###### notifications/
+- `GET`, `PATCH :id/read`
+
 - WebSocket channel (authenticated with the access token, role-scoped rooms): `report.created`, `report.updated`, `supply.updated`, `job.reassigned`
 
 ## 11. Non-Functional Requirements
@@ -166,27 +240,32 @@ If denied, the janitor is notified and the job stays blocked until the janitor s
 
 - Student: report form, my reports list, report detail with timeline
 - Janitor: open jobs feed, my jobs, job detail (estimate, status, supply request)
-- Administrator: dashboard (open reports, janitor workload, budget), supply requests queue, reassignment view, user management
+- Administrator: dashboard (open reports, janitor workload), supply requests queue, reassignment view, user management
 
 ## 13. Technical Architecture
 
-- **Frontend:** Angular SPA. NgRx store with feature slices (auth, reports, jobs, supply requests, budget, notifications); effects for API calls and the WebSocket stream; selectors combine streams (e.g. reports + janitor workload for the reassignment view); route guards and an HTTP interceptor for tokens and refresh.
-- **Backend:** NestJS modules per domain (auth, users, reports, jobs, supply, budget, notifications) with guards, DTO validation and a WebSocket gateway.
-- **Auth:** Passport.js local and JWT strategies; refresh-token rotation with reuse detection.
-- **Database:** relational (PostgreSQL suggested) for transactions on acceptance and reassignment.
+- **Frontend:** Angular SPA. NgRx store with feature slices (auth, reports, jobs, supply requests, notifications), 
+  Effects for API calls and the WebSocket stream,
+  Selectors combine streams (e.g. reports + janitor workload for the reassignment view), Route guards and an HTTP interceptor for tokens and refresh.
+- **Backend:** NestJS modules per domain (auth, users, reports, jobs, supply, notifications) with guards, DTO validation and a WebSocket gateway.
+- **Auth:** Passport.js local and JWT strategies, refresh-token rotation with reuse detection.
+- **Database:** Relational (PostgreSQL) for transactions on acceptance and reassignment.
 
 ## 14. Open Questions
 
 1. Should janitors have specializations (plumber, electrician) that affect which alerts they receive?
-2. Who sets initial severity: student, janitor, or administrator?
+	Yes, janitors have specializations.
+2. Who sets initial severity: student, janitor, or administrator? 
+	Student makes initial severity and the admin can change it if nessesery.
 3. Can a janitor release a job they accepted? If so, under what rules?
+	Janitor can start another job while he waits for supply delivery or the higher severity event happend.
 4. Should the student be able to rate or confirm the finished repair (reopen if not fixed)?
-5. What happens to a job when its supply request is denied and no alternative exists?
-6. Are there working hours/shifts that should limit alerts?
-7. Is the budget per period, per category, or a single pool?
-8. How are student accounts created: manual, CSV roster import, or sync with a university system?
-9. Which delivery channel sends activation and reset links before email is in scope (administrator copies the link, or email only for these)?
-10. When a report concerns a common area, should the student pick from a predefined list of areas?
+	No at the first, maybe the capability would be added later.
+5. Are there working hours/shifts that should limit alerts?
+	I dont think that is neccessery
+6. How are student accounts created: manual, CSV roster import, or sync with a university system?
+7. Which delivery channel sends activation and reset links before email is in scope (administrator copies the link, or email only for these)?
+	I imagine that dormitory administrator takes student e-mails with other paperwork when they move in.
 
 ## 15. Current Milestones
 
