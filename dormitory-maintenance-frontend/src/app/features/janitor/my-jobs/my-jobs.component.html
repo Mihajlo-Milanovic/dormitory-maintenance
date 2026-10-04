@@ -1,0 +1,74 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">My Maintenance Jobs</h1>
+      <p class="text-sm text-gray-500">Manage your active task, paused jobs waiting for supplies, and work history</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+      <a routerLink="/janitor" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs">
+        &larr; Back to Open Jobs Feed
+      </a>
+    </div>
+  </div>
+
+  @if (loading$ | async) {
+    <div class="text-center py-12">
+      <p class="text-sm text-gray-500">Loading your jobs...</p>
+    </div>
+  } @else {
+    @let jobs = myJobs$ | async;
+
+    @if (jobs && jobs.length > 0) {
+      <div class="space-y-6">
+        @for (job of jobs; track job.id) {
+          <div class="bg-white rounded-lg shadow-xs border border-gray-200 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="space-y-2 flex-1">
+              <div class="flex items-center space-x-3">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-gray-100 text-gray-800">
+                  {{ job.category }}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold {{ job.status === 'Accepted' ? 'bg-blue-100 text-blue-800' : job.status === 'Repair in progress' ? 'bg-indigo-100 text-indigo-800' : job.status === 'Waiting for supplies' ? 'bg-amber-100 text-amber-800' : job.status === 'Finished' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                  {{ job.status }}
+                </span>
+                <span class="text-xs text-gray-500">Severity: <strong class="text-gray-700">{{ job.severity }}</strong></span>
+              </div>
+
+              <h3 class="text-lg font-semibold text-gray-900">{{ job.title }}</h3>
+              <p class="text-sm text-gray-600 line-clamp-2">{{ job.description }}</p>
+
+              <div class="flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500 pt-1">
+                <span>Location: <strong class="text-gray-700">{{ job.location }}</strong></span>
+                <span>Student: <strong class="text-gray-700">{{ job.studentName }}</strong></span>
+                @if (job.timeEstimateMinutes) {
+                  <span>Time Estimate: <strong class="text-gray-700">{{ job.timeEstimateMinutes }} mins</strong></span>
+                }
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3 self-end md:self-center">
+              @if (job.status === 'Waiting for supplies') {
+                <button
+                  (click)="onResume(job.id)"
+                  class="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 shadow-xs"
+                >
+                  Ready to Resume
+                </button>
+              }
+              <a [routerLink]="['/janitor', job.id]" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs">
+                Manage Job &rarr;
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-16 bg-white rounded-lg border border-gray-200">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No jobs assigned</h3>
+        <p class="mt-1 text-sm text-gray-500">You haven't accepted any maintenance jobs yet. Check the Open Jobs Feed.</p>
+      </div>
+    }
+  }
+</div>
