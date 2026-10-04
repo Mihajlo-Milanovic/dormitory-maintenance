@@ -1,0 +1,209 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6 flex items-center justify-between">
+    <a routerLink="/janitor" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">
+      &larr; Back to Job Feed
+    </a>
+    <a routerLink="/janitor/my-jobs" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+      My Jobs &rarr;
+    </a>
+  </div>
+
+  @if (loading$ | async) {
+    <div class="text-center py-12">
+      <p class="text-sm text-gray-500">Loading job details...</p>
+    </div>
+  } @else {
+    @let job = job$ | async;
+
+    @if (job) {
+      <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden mb-8">
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-3 mb-1">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-gray-200 text-gray-800">
+                {{ job.category }}
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold {{ job.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' : job.status === 'Accepted' ? 'bg-blue-100 text-blue-800' : job.status === 'Repair in progress' ? 'bg-indigo-100 text-indigo-800' : job.status === 'Waiting for supplies' ? 'bg-amber-100 text-amber-800' : job.status === 'Finished' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                {{ job.status }}
+              </span>
+              <span class="text-xs text-gray-500">Severity: <strong class="text-gray-700">{{ job.severity }}</strong></span>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ job.title }}</h1>
+          </div>
+
+          @if (job.status === 'Waiting') {
+            <button
+              (click)="onAccept()"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-xs text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              Accept This Job
+            </button>
+          }
+        </div>
+
+        <!-- Body -->
+        <div class="px-6 py-6 space-y-6">
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Description</h3>
+            <p class="text-sm text-gray-800 whitespace-pre-wrap bg-gray-50 p-4 rounded-md border border-gray-100">{{ job.description }}</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+            <div>
+              <span class="text-xs font-medium text-gray-500 block">Location</span>
+              <span class="text-sm font-medium text-gray-900">{{ job.location }}</span>
+            </div>
+            <div>
+              <span class="text-xs font-medium text-gray-500 block">Student</span>
+              <span class="text-sm font-medium text-gray-900">{{ job.studentName }}</span>
+            </div>
+            <div>
+              <span class="text-xs font-medium text-gray-500 block">Assigned Janitor</span>
+              <span class="text-sm font-medium text-gray-900">{{ job.janitorName || 'Unassigned' }}</span>
+            </div>
+          </div>
+
+          @if (job.timeEstimateMinutes) {
+            <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-md flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-indigo-800 block">Estimated Time to Complete</span>
+                <span class="text-lg font-bold text-indigo-900">{{ job.timeEstimateMinutes }} minutes</span>
+              </div>
+            </div>
+          }
+
+          <!-- Janitor Actions Section (if assigned / active) -->
+          @if (job.status === 'Accepted' || job.status === 'Repair in progress' || job.status === 'Waiting for supplies') {
+            <div class="border-t border-gray-200 pt-6 space-y-6">
+              <h3 class="text-lg font-medium text-gray-900">Job Management & Controls</h3>
+
+              <!-- Time Estimate Form -->
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                <h4 class="text-sm font-medium text-gray-900">Set / Revise Time Estimate</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Minutes</label>
+                    <input type="number" [(ngModel)]="timeEstimateMinutes" min="5" step="5" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border"/>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Justification (Optional)</label>
+                    <input type="text" [(ngModel)]="estimateJustification" placeholder="Reason for time estimate..." class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border"/>
+                  </div>
+                </div>
+                <button
+                  (click)="onSaveEstimate()"
+                  class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs"
+                >
+                  Save Time Estimate
+                </button>
+              </div>
+
+              <!-- Status Transitions & Supply Request -->
+              <div class="flex flex-wrap gap-3 items-center pt-2">
+                @if (job.status === 'Accepted') {
+                  <button
+                    (click)="onUpdateStatus('Repair in progress')"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-xs text-white bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Start Repair (In Progress)
+                  </button>
+                }
+
+                @if (job.status === 'Repair in progress') {
+                  <button
+                    (click)="onUpdateStatus('Finished')"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-xs text-white bg-green-600 hover:bg-green-700"
+                  >
+                    Mark Finished
+                  </button>
+                }
+
+                <button
+                  (click)="showSupplyModal = true"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs"
+                >
+                  📦 Request Supplies
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Timeline / Events -->
+          <div class="border-t border-gray-200 pt-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Event Timeline</h3>
+            <div class="flow-root">
+              <ul role="list" class="-mb-8">
+                @for (event of job.events; track event.id; let last = $last) {
+                  <li>
+                    <div class="relative pb-8">
+                      @if (!last) {
+                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                      }
+                      <div class="relative flex space-x-3">
+                        <div>
+                          <span class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center ring-8 ring-white text-white text-xs font-bold">
+                            ✓
+                          </span>
+                        </div>
+                        <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                          <div>
+                            <p class="text-sm text-gray-900 font-medium">Status changed to <span class="font-bold text-indigo-600">{{ event.status }}</span></p>
+                            @if (event.comment) {
+                              <p class="text-xs text-gray-600 mt-0.5">{{ event.comment }}</p>
+                            }
+                            <p class="text-xs text-gray-400 mt-1">By {{ event.authorName }}</p>
+                          </div>
+                          <div class="text-right text-xs whitespace-nowrap text-gray-500">
+                            {{ event.createdAt | date:'short' }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Supply Request Modal -->
+  @if (showSupplyModal) {
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-gray-500/75 flex items-center justify-center p-4">
+      <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl border border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Request Supplies for Job</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Item Name</label>
+            <input type="text" [(ngModel)]="supplyItem" placeholder="e.g. Copper pipe, 15mm..." class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+            <input type="number" [(ngModel)]="supplyQuantity" min="1" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Justification</label>
+            <textarea [(ngModel)]="supplyJustification" rows="3" placeholder="Why are these supplies needed?" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border"></textarea>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <button
+            (click)="showSupplyModal = false"
+            class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="onSubmitSupplyRequest()"
+            class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            Submit Request
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
