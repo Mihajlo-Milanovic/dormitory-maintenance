@@ -9,6 +9,8 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { authReducer } from './features/auth/state/auth.reducer';
 import { AuthEffects } from './features/auth/state/auth.effects';
+import { studentReportReducer } from './features/student/state/student-report.reducer';
+import { StudentReportEffects } from './features/student/state/student-report.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,7 +19,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideStore({
       auth: authReducer,
+      studentReports: studentReportReducer,
     }),
-    provideEffects([AuthEffects]),
+    provideEffects([AuthEffects, StudentReportEffects]),
   ],
 };

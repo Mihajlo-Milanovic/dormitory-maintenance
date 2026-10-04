@@ -10,7 +10,20 @@ export const routes: Routes = [
   {
     path: 'student',
     canActivate: [authGuard, roleGuard(['student'])],
-    loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent), // Placeholder until Phase 2
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/student/report-list.component').then((m) => m.ReportListComponent),
+      },
+      {
+        path: 'new',
+        loadComponent: () => import('./features/student/report-create.component').then((m) => m.ReportCreateComponent),
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/student/report-detail.component').then((m) => m.ReportDetailComponent),
+      },
+    ],
   },
   {
     path: 'janitor',
