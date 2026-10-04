@@ -11,6 +11,8 @@ import { authReducer } from './features/auth/state/auth.reducer';
 import { AuthEffects } from './features/auth/state/auth.effects';
 import { studentReportReducer } from './features/student/state/student-report.reducer';
 import { StudentReportEffects } from './features/student/state/student-report.effects';
+import { janitorReducer } from './features/janitor/state/janitor.reducer';
+import { JanitorEffects } from './features/janitor/state/janitor.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,7 +22,8 @@ export const appConfig: ApplicationConfig = {
     provideStore({
       auth: authReducer,
       studentReports: studentReportReducer,
+      janitor: janitorReducer,
     }),
-    provideEffects([AuthEffects, StudentReportEffects]),
+    provideEffects([AuthEffects, StudentReportEffects, JanitorEffects]),
   ],
 };

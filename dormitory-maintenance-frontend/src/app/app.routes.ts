@@ -28,7 +28,20 @@ export const routes: Routes = [
   {
     path: 'janitor',
     canActivate: [authGuard, roleGuard(['janitor'])],
-    loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent), // Placeholder until Phase 3
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/janitor/janitor-feed/janitor-feed.component').then((m) => m.JanitorFeedComponent),
+      },
+      {
+        path: 'my-jobs',
+        loadComponent: () => import('./features/janitor/my-jobs/my-jobs.component').then((m) => m.MyJobsComponent),
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/janitor/job-detail/job-detail.component').then((m) => m.JobDetailComponent),
+      },
+    ],
   },
   {
     path: 'admin',
