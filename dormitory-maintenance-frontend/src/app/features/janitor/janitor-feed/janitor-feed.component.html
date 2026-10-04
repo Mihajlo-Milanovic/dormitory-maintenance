@@ -1,0 +1,156 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Open Jobs Feed</h1>
+      <p class="text-sm text-gray-500">Browse unassigned maintenance reports and pick up jobs matching your specialization</p>
+    </div>
+    <div class="mt-4 md:mt-0 flex space-x-3">
+      <a routerLink="/janitor/my-jobs" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs">
+        View My Jobs & Active Task
+      </a>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-red-700">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (activeJob$ | async; as activeJob) {
+    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          Active Job Limit
+        </span>
+        <span class="text-sm text-amber-900">
+          You have an active job (<strong>{{ activeJob.title }}</strong>). You must finish or update it before accepting another report.
+        </span>
+      </div>
+      <a [routerLink]="['/janitor', activeJob.id]" class="text-sm font-medium text-amber-700 hover:text-amber-900 underline">
+        View Active Job &rarr;
+      </a>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="bg-white p-4 rounded-lg shadow-xs border border-gray-200 mb-6 flex flex-wrap gap-4 items-center">
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Category</label>
+      <select [(ngModel)]="selectedCategory" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border">
+        <option value="all">All Categories</option>
+        <option value="plumbing">Plumbing</option>
+        <option value="electrical">Electrical</option>
+        <option value="furniture">Furniture</option>
+        <option value="heating">Heating</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-700 mb-1">Severity</label>
+      <select [(ngModel)]="selectedSeverity" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border">
+        <option value="all">All Severities</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+        <option value="Critical">Critical</option>
+      </select>
+    </div>
+    <div class="flex-1 min-w-[200px]">
+      <label class="block text-xs font-medium text-gray-700 mb-1">Location Filter</label>
+      <input type="text" [(ngModel)]="searchLocation" placeholder="Search location..." class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-1.5 px-3 border"/>
+    </div>
+  </div>
+
+  @if (loading$ | async) {
+    <div class="text-center py-12">
+      <p class="text-sm text-gray-500">Loading open jobs feed...</p>
+    </div>
+  } @else {
+    @let user = currentUser$ | async;
+    @let openReports = openReports$ | async;
+    @let activeJob = activeJob$ | async;
+
+    @if (openReports && openReports.length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (report of openReports; track report.id) {
+          @if ((selectedCategory === 'all' || report.category === selectedCategory) &&
+               (selectedSeverity === 'all' || report.severity === selectedSeverity) &&
+               (!searchLocation || report.location.toLowerCase().includes(searchLocation.toLowerCase()))) {
+            @let specialized = isSpecialized(report.category, user?.specialization);
+            <div class="bg-white rounded-lg shadow-xs border transition-all hover:shadow-md flex flex-col justify-between overflow-hidden {{ specialized ? 'border-indigo-300 ring-2 ring-indigo-100' : 'border-gray-200' }}">
+              <div>
+                <div class="p-5">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-gray-100 text-gray-800">
+                      {{ report.category }}
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ report.severity === 'Critical' ? 'bg-red-100 text-red-800' : report.severity === 'High' ? 'bg-orange-100 text-orange-800' : report.severity === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                      {{ report.severity }}
+                    </span>
+                  </div>
+
+                  @if (specialized) {
+                    <div class="mb-2">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
+                        ⭐ Matches Your Specialization
+                      </span>
+                    </div>
+                  }
+
+                  <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ report.title }}</h3>
+                  <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ report.description }}</p>
+
+                  <div class="space-y-1.5 text-xs text-gray-500 border-t border-gray-100 pt-3">
+                    <div class="flex justify-between">
+                      <span>Location:</span>
+                      <span class="font-medium text-gray-900">{{ report.location }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span>Submitted By:</span>
+                      <span class="font-medium text-gray-900">{{ report.studentName }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span>Date:</span>
+                      <span>{{ report.createdAt | date:'short' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+                <a [routerLink]="['/janitor', report.id]" class="text-xs font-medium text-indigo-600 hover:text-indigo-900">
+                  View Details &rarr;
+                </a>
+                <button
+                  (click)="onAccept(report.id, activeJob)"
+                  [disabled]="!!activeJob"
+                  class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-xs text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Accept Job
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    } @else {
+      <div class="text-center py-16 bg-white rounded-lg border border-gray-200">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No open jobs</h3>
+        <p class="mt-1 text-sm text-gray-500">There are currently no waiting maintenance reports in the feed.</p>
+      </div>
+    }
+  }
+</div>
