@@ -1,0 +1,112 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { StudentReportActions } from './state/student-report.actions';
+import { selectAllStudentReports, selectStudentReportLoading } from './state/student-report.selectors';
+
+@Component({
+  selector: 'app-report-list',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">My Maintenance Reports</h1>
+          <p class="text-sm text-gray-500">Track and manage your submitted damage and defect reports</p>
+        </div>
+        <a
+          routerLink="new"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+        >
+          New Report
+        </a>
+      </div>
+
+      @if (loading$ | async) {
+        <div class="text-center py-12">
+          <p class="text-sm text-gray-500">Loading reports...</p>
+        </div>
+      } @else {
+        <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title / Category</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              @for (report of reports$ | async; track report.id) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ report.title }}</div>
+                    <div class="text-xs text-gray-500 capitalize">{{ report.category }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ report.location }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span
+                      class="px-2.5 py-0.5 inline-flex text-xs font-semibold rounded-full"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-800': report.severity === 'Low',
+                        'bg-yellow-100 text-yellow-800': report.severity === 'Medium',
+                        'bg-orange-100 text-orange-800': report.severity === 'High',
+                        'bg-red-100 text-red-800': report.severity === 'Critical'
+                      }"
+                    >
+                      {{ report.severity }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span
+                      class="px-2.5 py-0.5 inline-flex text-xs font-semibold rounded-full"
+                      [ngClass]="{
+                        'bg-gray-100 text-gray-800': report.status === 'Waiting',
+                        'bg-indigo-100 text-indigo-800': report.status === 'Accepted',
+                        'bg-blue-100 text-blue-800': report.status === 'Repair in progress',
+                        'bg-purple-100 text-purple-800': report.status === 'Waiting for supplies',
+                        'bg-green-100 text-green-800': report.status === 'Finished',
+                        'bg-red-100 text-red-800': report.status === 'Cancelled'
+                      }"
+                    >
+                      {{ report.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ report.createdAt | date:'short' }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a [routerLink]="['/student', report.id]" class="text-indigo-600 hover:text-indigo-900">View</a>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
+                    No maintenance reports found. Click "New Report" to submit one.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  `,
+})
+export class ReportListComponent implements OnInit {
+  private readonly store = inject(Store);
+
+  protected readonly reports$ = this.store.select(selectAllStudentReports);
+  protected readonly loading$ = this.store.select(selectStudentReportLoading);
+
+  ngOnInit(): void {
+    this.store.dispatch(StudentReportActions.loadReports());
+  }
+}

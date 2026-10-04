@@ -1,0 +1,151 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { StudentReportActions } from './state/student-report.actions';
+import { selectStudentReportLoading } from './state/student-report.selectors';
+import { ReportCategory, ReportSeverity } from '../../shared/models/report.model';
+
+@Component({
+  selector: 'app-report-create',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  template: `
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-6">
+        <a routerLink="/student" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">&larr; Back to My Reports</a>
+        <h1 class="text-2xl font-bold text-gray-900 mt-2">Create Maintenance Report</h1>
+        <p class="text-sm text-gray-500">Provide details about the damage or defect in your room or dormitory</p>
+      </div>
+
+      <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
+        <form [formGroup]="reportForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <div>
+            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="e.g., Leaking bathroom faucet"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                id="category"
+                formControlName="category"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white capitalize"
+              >
+                @for (cat of categories; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label for="severity" class="block text-sm font-medium text-gray-700 mb-1">Initial Severity</label>
+              <select
+                id="severity"
+                formControlName="severity"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white"
+              >
+                @for (sev of severities; track sev) {
+                  <option [value]="sev">{{ sev }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location / Room Number</label>
+            <input
+              id="location"
+              type="text"
+              formControlName="location"
+              placeholder="e.g., Block B, Room 402"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              id="description"
+              rows="4"
+              formControlName="description"
+              placeholder="Describe the issue in detail..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            ></textarea>
+          </div>
+
+          <div>
+            <label for="photoUrl" class="block text-sm font-medium text-gray-700 mb-1">Photo Attachment (URL optional)</label>
+            <input
+              id="photoUrl"
+              type="text"
+              formControlName="photoUrl"
+              placeholder="https://example.com/photo.jpg"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div class="flex justify-end space-x-4">
+            <a
+              routerLink="/student"
+              class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+            >
+              Cancel
+            </a>
+            <button
+              type="submit"
+              [disabled]="reportForm.invalid || (loading$ | async)"
+              class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors"
+            >
+              Submit Report
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `,
+})
+export class ReportCreateComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly store = inject(Store);
+
+  protected readonly categories: ReportCategory[] = ['plumbing', 'electrical', 'furniture', 'heating', 'other'];
+  protected readonly severities: ReportSeverity[] = ['Low', 'Medium', 'High', 'Critical'];
+
+  protected readonly loading$ = this.store.select(selectStudentReportLoading);
+
+  protected readonly reportForm = this.fb.group({
+    title: ['', [Validators.required, Validators.minLength(3)]],
+    category: ['plumbing', [Validators.required]],
+    severity: ['Medium', [Validators.required]],
+    location: ['', [Validators.required]],
+    description: ['', [Validators.required, Validators.minLength(10)]],
+    photoUrl: [''],
+  });
+
+  protected onSubmit(): void {
+    if (this.reportForm.valid) {
+      const val = this.reportForm.value;
+      this.store.dispatch(
+        StudentReportActions.createReport({
+          payload: {
+            title: val.title!,
+            category: val.category as ReportCategory,
+            severity: val.severity as ReportSeverity,
+            location: val.location!,
+            description: val.description!,
+            photoUrl: val.photoUrl || undefined,
+          },
+        })
+      );
+    }
+  }
+}
