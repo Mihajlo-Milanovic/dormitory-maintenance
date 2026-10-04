@@ -9,6 +9,7 @@
 - **Strict Typing:** Enforce strict TypeScript types. Never use `any`.
 - **Component Pattern:** Separate Smart (Container) components (interact with Store) from Dumb (Presentational) components (use `@Input` and `@Output`).
 - **RxJS Operators:** Use `switchMap` for read/search operations, `exhaustMap` for non-repeatable writes (like logins), and `concatMap` for sequential writes. Always manage subscriptions using `takeUntilDestroyed()` or the `async` pipe.
+- **Components:** Put components into their name directory. Always separate HTML, CSS, and TS files.
 
 ## NgRx State Management Best Practices
 - **Actions:** Use the `createActionGroup` factory. Name events in the format `[Source] Event Name` (e.g., `[Product Page] Load Items`).

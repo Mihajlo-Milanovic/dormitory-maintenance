@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { StudentReportActions } from './state/student-report.actions';
-import { selectStudentReportLoading } from './state/student-report.selectors';
-import { ReportCategory, ReportSeverity } from '../../shared/models/report.model';
+import { StudentReportActions } from '../state/student-report.actions';
+import { selectStudentReportLoading } from '../state/student-report.selectors';
+import { ReportCategory, ReportSeverity } from '../../../shared/models/report.model';
 
 @Component({
   selector: 'app-report-create',

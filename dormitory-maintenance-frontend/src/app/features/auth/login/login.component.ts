@@ -2,8 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { AuthActions } from './state/auth.actions';
-import { selectAuthLoading, selectAuthError } from './state/auth.selectors';
+import { AuthActions } from '../state/auth.actions';
+import { selectAuthLoading, selectAuthError } from '../state/auth.selectors';
 
 @Component({
   selector: 'app-login',

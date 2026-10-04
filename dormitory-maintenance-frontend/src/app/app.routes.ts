@@ -5,7 +5,7 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: 'auth/login',
-    loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
+    loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'student',
@@ -13,27 +13,27 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./features/student/report-list.component').then((m) => m.ReportListComponent),
+        loadComponent: () => import('./features/student/report-list/report-list.component').then((m) => m.ReportListComponent),
       },
       {
         path: 'new',
-        loadComponent: () => import('./features/student/report-create.component').then((m) => m.ReportCreateComponent),
+        loadComponent: () => import('./features/student/report-create/report-create.component').then((m) => m.ReportCreateComponent),
       },
       {
         path: ':id',
-        loadComponent: () => import('./features/student/report-detail.component').then((m) => m.ReportDetailComponent),
+        loadComponent: () => import('./features/student/report-detail/report-detail.component').then((m) => m.ReportDetailComponent),
       },
     ],
   },
   {
     path: 'janitor',
     canActivate: [authGuard, roleGuard(['janitor'])],
-    loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent), // Placeholder until Phase 3
+    loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent), // Placeholder until Phase 3
   },
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard(['admin'])],
-    loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent), // Placeholder until Phase 4/5
+    loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent), // Placeholder until Phase 4/5
   },
   {
     path: '',

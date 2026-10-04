@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { StudentReportActions } from './state/student-report.actions';
-import { selectAllStudentReports, selectStudentReportLoading } from './state/student-report.selectors';
+import { StudentReportActions } from '../state/student-report.actions';
+import { selectAllStudentReports, selectStudentReportLoading } from '../state/student-report.selectors';
 
 @Component({
   selector: 'app-report-list',
