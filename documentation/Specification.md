@@ -31,7 +31,7 @@ A web application that lets dormitory residents report damage or defects, lets j
 **Out of scope (v1):**
 - payments, billing students for damage, inventory of physical stock
 - native mobile apps (the web UI is responsive)
-- student confirmation, rating or reopening of finished repairs (possible later extension, see D11)
+- student confirmation, rating, or reopening of finished repairs (possible later extension, see D11)
 - shift or working-hours scheduling
 
 ### Glossary
@@ -71,7 +71,7 @@ Role-based access control (RBAC) is enforced on every endpoint and every UI rout
 ### 3.1 User Provisioning and Role Assignment
 
 **Account creation**
-- No public self-registration. Accounts are created by an administrator, singly or by bulk CSV import (e.g. a student roster built from move-in paperwork).
+- No public self-registration. Accounts are created by an administrator, singly or by bulk CSV import (e.g., a student roster built from move-in paperwork).
 - Administrator accounts are created only by an existing administrator or by a one-time bootstrap command. A second factor is optional for administrators.
 
 **Onboarding and credentials**
@@ -82,10 +82,10 @@ Role-based access control (RBAC) is enforced on every endpoint and every UI rout
 
 **Roles and access**
 - Exactly one role per user, assigned by an administrator. Least privilege: default deny, guards on every route.
-- Janitor specializations are assigned by an administrator, at creation or later.
+- An administrator assigns janitor specializations, at creation or later.
 
 **Audit and retention**
-- Role changes, specialization changes and deactivations are audit-logged (who, when, previous and new value).
+- Role changes, specialization changes, and deactivations are audit-logged (who, when, previous and new value).
 - Users are deactivated, never hard-deleted, so history stays intact.
 
 ## 4. Functional Requirements
@@ -178,8 +178,8 @@ stateDiagram-v2
 
 - A janitor holds at most one active job (`Accepted` or `Repair in progress`). A job in `Waiting for supplies` is not active, so the janitor may accept another job meanwhile.
 - Janitors cannot release a job voluntarily. A job leaves its janitor only when the administrator reassigns the janitor to a higher-severity job (the job returns to `Waiting`) or the job is in `Waiting for supplies` state.
-- If supplies arrive while the janitor is busy with another active job, the original job stays in `Waiting for supplies` and unassigned so some other janitor can continue the work, or  until the janitor finishes the active job and resumes it.
-- Every transition is recorded with actor, timestamp and optional comment. Severity changes are recorded as well (see `ReportEvent` in section 9).
+- If supplies arrive while the janitor is busy with another active job, the original job stays in `Waiting for supplies` and unassigned so some other janitor can continue the work, or until the janitor finishes the active job and resumes it.
+- Every transition is recorded with an actor, timestamp, and optional comment. Severity changes are recorded as well (see `ReportEvent` in section 9).
 
 ## 6. Supply Request Lifecycle
 
@@ -189,7 +189,7 @@ The administrator moves a request to `Ordered` and sets the expected arrival tim
 
 ## 7. Priority and Reassignment Rules
 
-- Severity levels: `Low`, `Medium`, `High`, `Critical` (e.g. flooding, no heating in winter, electrical hazard).
+- Severity levels: `Low`, `Medium`, `High`, `Critical` (e.g., flooding, no heating in winter, electrical hazard).
 - The student sets the initial severity; only the administrator can change it afterwards.
 - Reassignment is offered to the administrator only when a report with higher severity than a janitor's current active job is open and no janitor is free.
 - The system suggests the best candidate: lowest-severity current job, the least progress, preferring janitors whose specializations match the category of the higher-severity report.
@@ -338,7 +338,7 @@ No `Dormitory` entity in v1 (single dormitory per deployment); a `dormitoryId` c
 | payload |       |
 | readAt  |       |
 
-## 10. API Endpoints (REST + real-time) 
+## 10. API Endpoints (REST and real-time) 
 ### /api/v1/
 #### auth/
 
@@ -416,7 +416,7 @@ Authenticated with the access token; role-scoped rooms, and janitors are additio
 
 ## 12. Screens (initial)
 
-- **Student:** report form (with initial severity), my reports list, report detail with timeline
+- **Student:** report form (with initial severity), my report list, report detail with timeline
 - **Janitor:** open jobs feed (all unassigned reports, specialization-matching ones highlighted or filtered by default), my jobs (with a "ready to resume" flag), job detail (estimate, status, supply request)
 - **Administrator:** dashboard (open reports, janitor workload), supply requests queue, reassignment view, user management (including janitor specializations)
 
@@ -425,9 +425,9 @@ Authenticated with the access token; role-scoped rooms, and janitors are additio
 - **Frontend:** Angular SPA.
 	- NgRx store with feature slices (auth, reports, jobs, supply requests, notifications).
 	- Effects for API calls and the WebSocket stream.
-	- Selectors combine streams (e.g. reports + janitor workload for the reassignment view).
+	- Selectors combine streams (e.g., reports and janitor workload for the reassignment view).
 	- Route guards and an HTTP interceptor for tokens and refresh.
-- **Backend:** NestJS modules per domain (auth, users, reports, jobs, supply, notifications) with guards, DTO validation and a WebSocket gateway.
+- **Backend:** NestJS modules per domain (auth, users, reports, jobs, supply, notifications) with guards, DTO validation, and a WebSocket gateway.
 - **Auth:** Passport.js local and JWT strategies; refresh-token rotation with reuse detection.
 - **Database:** relational (PostgreSQL) for transactions on acceptance and reassignment.
 
@@ -444,6 +444,6 @@ Authenticated with the access token; role-scoped rooms, and janitors are additio
 1. Auth (Passport.js/JWT, refresh rotation), provisioning and activation flow (email links), roles, janitor specializations, user management
 2. Report creation (with initial severity) and student views
 3. Janitor feed, acceptance (one-active-job rule), estimates, statuses
-4. Supply requests, ordering and delivery tracking by the administrator
+4. Supply requests, ordering, and delivery tracking by the administrator
 5. Reassignment and priority logic (administrator severity changes)
 6. Real-time notifications (specialization-based routing), polish, testing
