@@ -50,7 +50,7 @@
           </div>
           <div>
             <span class="text-gray-500 block">Assigned Janitor</span>
-            <span class="font-medium text-gray-900">{{ report.janitorName || 'Unassigned' }}</span>
+            <span class="font-medium text-gray-900">{{ report.janitorName || '---' }}</span>
           </div>
           <div>
             <span class="text-gray-500 block">Time Estimate</span>
@@ -58,7 +58,7 @@
               @if (report.timeEstimateMinutes) {
                 {{ report.timeEstimateMinutes }} minutes
               } @else {
-                Not set yet
+                --:--:--
               }
             </span>
           </div>
