@@ -82,29 +82,30 @@ src/app/
 
 ## 5. Implementation Milestones & Phases
 
-### Phase 1: Foundation & Authentication
-- Set up TailwindCSS, NgRx root store, core HTTP interceptors, and JWT authentication flow.
-- Implement login, session persistence, route guards, and app shell layout.
+- [X] **Phase 1: Foundation & Authentication**
+  - [X] Set up TailwindCSS, NgRx root store, core HTTP interceptors, and JWT authentication flow.
+  - [X] Implement login, session persistence, route guards, and app shell layout.
 
-### Phase 2: Student Portal & Report Lifecycle
-- Implement report creation form with initial severity and file attachments.
-- Build student report list and detail view with event timeline.
+- [X] **Phase 2: Student Portal & Report Lifecycle** 
+  - [X] Implement the report creation form with initial severity and file attachments.
+  - [X] Build a student report list and detail a view with the event timeline.
 
-### Phase 3: Janitor Feed & Job Execution
-- Build open jobs feed with specialization filtering and highlighting.
-- Implement job acceptance (with active job validation), time estimation, status transitions, and supply request modals.
+- [X] **Phase 3: Janitor Feed & Job Execution**
+  - [X] Build an open jobs feed with specialization filtering and highlighting.
+  - [X] Implement job acceptance (with active job validation), time estimation, status transitions, and supply request modals.
 
-### Phase 4: Supply Request Management & Administrator Queue
-- Implement administrator supply queue (`Ordered`, `Delivered`, expected arrival times).
-- Build supply notification states and "ready to resume" flags.
+- [ ] Phase 4: Supply Request Management & Administrator Queue
+  - [ ] Implement administrator supply queue (`Ordered`, `Delivered`, expected arrival times).
+  - [ ] Expected arrival is written in a text field by the administrator as the supply and suppliers management is not in scope for the current version.  
+  - [ ] Build supply notification states and "ready to resume" flags.
 
-### Phase 5: Reassignment, Severity & User Administration
-- Implement administrator reassignment view with smart candidate suggestions.
-- Build severity adjustment and comprehensive user management (single/CSV import, roles, specializations).
+- [ ] **Phase 5: Reassignment, Severity & User Administration**
+  - [ ] Implement the administrator reassignment view with smart candidate suggestions.
+  - [ ] Build severity adjustment and comprehensive user management (single/CSV import, roles, specializations).
 
-### Phase 6: Real-Time WebSocket, Polish & Testing
-- Integrate WebSocket effects for live notifications (`report.created`, `report.updated`, etc.).
-- Add end-to-end unit and component tests using Vitest and Angular testing utilities.
+- [ ] **Phase 6: Real-Time WebSocket, Polish & Testing**
+  - [ ] Integrate WebSocket effects for live notifications (`report.created`, `report.updated`, etc.).
+  - [ ] Add end-to-end unit and component tests using Vitest and Angular testing utilities.
 
 ---
 
