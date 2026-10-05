@@ -46,7 +46,26 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard(['admin'])],
-    loadComponent: () => import('./features/admin/supply-queue/supply-queue.component').then((m) => m.SupplyQueueComponent),
+    loadComponent: () => import('./features/admin/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
+    children: [
+      {
+        path: '',
+        redirectTo: 'supplies',
+        pathMatch: 'full',
+      },
+      {
+        path: 'supplies',
+        loadComponent: () => import('./features/admin/supply-queue/supply-queue.component').then((m) => m.SupplyQueueComponent),
+      },
+      {
+        path: 'reassignment',
+        loadComponent: () => import('./features/admin/reassignment/reassignment.component').then((m) => m.ReassignmentComponent),
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./features/admin/user-management/user-management.component').then((m) => m.UserManagementComponent),
+      },
+    ],
   },
   {
     path: '',

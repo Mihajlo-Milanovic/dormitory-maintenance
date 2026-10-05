@@ -1,0 +1,131 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">User Management & Roster Import</h1>
+      <p class="text-sm text-gray-500">Create individual accounts, bulk import via CSV, assign roles and janitor specializations.</p>
+    </div>
+    <div class="mt-4 md:mt-0 flex space-x-3">
+      <button
+        (click)="showCreateForm = !showCreateForm; showCsvImport = false"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs"
+      >
+        ➕ Add New User
+      </button>
+      <button
+        (click)="showCsvImport = !showCsvImport; showCreateForm = false"
+        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs"
+      >
+        📄 CSV Bulk Import
+      </button>
+    </div>
+  </div>
+
+  <!-- Single User Creation Modal / Card -->
+  @if (showCreateForm) {
+    <div class="bg-white rounded-lg shadow-xs border border-gray-200 p-6 mb-8">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Create New User</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
+          <input type="text" [(ngModel)]="newName" placeholder="John Doe" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-3 border" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Email Address</label>
+          <input type="email" [(ngModel)]="newEmail" placeholder="john@dorm.edu" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-3 border" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Role</label>
+          <select [(ngModel)]="newRole" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-3 border bg-white">
+            <option value="student">Student</option>
+            <option value="janitor">Janitor</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        @if (newRole === 'janitor') {
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Janitor Specialization</label>
+            <select [(ngModel)]="newSpecialization" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-3 border bg-white">
+              <option value="plumbing">Plumbing</option>
+              <option value="electrical">Electrical</option>
+              <option value="furniture">Furniture</option>
+              <option value="heating">Heating</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        }
+      </div>
+      <div class="mt-4 flex justify-end space-x-3">
+        <button (click)="showCreateForm = false" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
+        <button (click)="createUser()" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Save User</button>
+      </div>
+    </div>
+  }
+
+  <!-- CSV Bulk Import Card -->
+  @if (showCsvImport) {
+    <div class="bg-white rounded-lg shadow-xs border border-gray-200 p-6 mb-8">
+      <h3 class="text-lg font-medium text-gray-900 mb-2">CSV Roster Bulk Import</h3>
+      <p class="text-xs text-gray-500 mb-4">Paste CSV data (Format: name,email,role,specialization)</p>
+      <textarea [(ngModel)]="csvText" rows="5" placeholder="Alice Smith,alice@dorm.edu,student&#10;Bob Builder,bob@dorm.edu,janitor,plumbing" class="block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2 px-3 border font-mono"></textarea>
+      <div class="mt-4 flex justify-end space-x-3">
+        <button (click)="showCsvImport = false" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
+        <button (click)="importCsv()" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Import CSV</button>
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-sm text-gray-500">Loading users...</p>
+    </div>
+  } @else if (error) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm mb-6">
+      {{ error }}
+    </div>
+  } @else {
+    <div class="bg-white shadow-xs border border-gray-200 rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (user of users; track user.id) {
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+                <div class="text-xs text-gray-500">{{ user.email }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase {{ user.role === 'admin' ? 'bg-purple-100 text-purple-800' : user.role === 'janitor' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500 capitalize">
+                {{ user.specialization || '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold {{ user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                  {{ user.isActive ? 'Active' : 'Deactivated' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button
+                  (click)="toggleActive(user)"
+                  class="text-xs font-medium {{ user.isActive ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900' }}"
+                >
+                  {{ user.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
