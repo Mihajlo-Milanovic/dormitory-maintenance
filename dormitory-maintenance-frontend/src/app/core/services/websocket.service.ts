@@ -7,31 +7,46 @@ import { AuthService } from './auth.service';
 })
 export class WebSocketService {
   private readonly authService = inject(AuthService);
-  private socket$: Subject<any> | null = null;
+  private ws: WebSocket | null = null;
+  private readonly messageSubject = new Subject<any>();
 
   connect(): void {
-    if (this.socket$) {
+    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
     const token = this.authService.getAccessToken();
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${window.location.host}/ws?token=${token || ''}`;
 
-    // For initial scaffold/prototype, we can maintain a Subject or standard WebSocket wrapper
-    // In later phases or actual production, RxJS webSocket can be utilized.
+    try {
+      this.ws = new WebSocket(wsUrl);
+      this.ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          this.messageSubject.next(data);
+        } catch {
+          this.messageSubject.next(event.data);
+        }
+      };
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+      this.ws.onclose = () => {
+        this.ws = null;
+      };
+    } catch (e) {
+      console.error('Failed to connect WebSocket:', e);
+    }
   }
 
   disconnect(): void {
-    if (this.socket$) {
-      this.socket$.complete();
-      this.socket$ = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
   }
 
   onMessage(): Observable<any> {
-    if (!this.socket$) {
-      this.socket$ = new Subject<any>();
-    }
-    return this.socket$.asObservable();
+    return this.messageSubject.asObservable();
   }
 }
