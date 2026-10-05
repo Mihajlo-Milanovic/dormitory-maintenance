@@ -62,15 +62,15 @@ src/app/
 - **Open Jobs Feed:** Browse all unassigned reports (`Waiting`), with automatic highlighting and top filtering for reports matching the janitor's specializations (`other` matches all). Filterable by category, severity, and location.
 - **My Jobs View:** Active job tracker enforcing the "one active job at a time" rule (`Accepted` or `Repair in progress`), listing paused jobs in `Waiting for supplies` with "ready to resume" flags, and completed work history.
 - **Job Detail & Management:**
-  - Accept report (race-safe check against active job constraint).
-  - Enter / revise time estimate (in minutes) with justification.
+  - Accept a report (race-safe check against active job constraint).
+  - Enter / revise the time estimate (in minutes) with justification.
   - State transitions (`Repair in progress`, `Finished`).
   - Supply request creation modal (item, quantity, justification) which transitions the job to `Waiting for supplies`.
 
 ### 4.4 Administrator Module (`features/admin`)
 - **Dashboard:** Overview of open reports, janitor workload, active jobs, and pending supply requests.
 - **Supply Requests Queue:** Track requests (`Requested` → `Ordered` → `Delivered`), set expected arrival times (`arrivalAt`).
-- **Reassignment View:** Interface triggered when a high-severity report arrives and no janitors are free. System suggests candidate janitors (lowest severity current job, least progress, matching specialization) for reassignment (`POST :id/reassign`).
+- **Reassignment View:** Interface triggered when a high-severity report arrives and no janitors are free. System suggests candidate janitors (lowest severity current job, the least progress, matching specialization) for reassignment (`POST :id/reassign`).
 - **Severity Override:** Adjust report severity after creation with audit logging.
 - **User Management:** Create individual users or bulk import via CSV, assign roles, configure janitor specializations, send activation links, and manage account deactivation.
 
@@ -103,9 +103,9 @@ src/app/
   - [X] Implement the administrator reassignment view with smart candidate suggestions.
   - [X] Build severity adjustment and comprehensive user management (single/CSV import, roles, specializations).
 
-- [ ] **Phase 6: Real-Time WebSocket, Polish & Testing**
-  - [ ] Integrate WebSocket effects for live notifications (`report.created`, `report.updated`, etc.).
-  - [ ] Add end-to-end unit and component tests using Vitest and Angular testing utilities.
+- [X] **Phase 6: Real-Time WebSocket, Polish & Testing**
+  - [X] Integrate WebSocket effects for live notifications (`report.created`, `report.updated`, etc.).
+  - [X] Add end-to-end unit and component tests using Vitest and Angular testing utilities.
 
 ---
 
