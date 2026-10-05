@@ -94,10 +94,10 @@ src/app/
   - [X] Build an open jobs feed with specialization filtering and highlighting.
   - [X] Implement job acceptance (with active job validation), time estimation, status transitions, and supply request modals.
 
-- [ ] Phase 4: Supply Request Management & Administrator Queue
-  - [ ] Implement administrator supply queue (`Ordered`, `Delivered`, expected arrival times).
-  - [ ] Expected arrival is written in a text field by the administrator as the supply and suppliers management is not in scope for the current version.  
-  - [ ] Build supply notification states and "ready to resume" flags.
+- [X] **Phase 4: Supply Request Management & Administrator Queue**
+  - [X] Implement administrator supply queue (`Ordered`, `Delivered`, expected arrival times).
+  - [X] Expected arrival is written in a text field by the administrator as the supply and suppliers management is not in scope for the current version.  
+  - [X] Build supply notification states and "ready to resume" flags.
 
 - [ ] **Phase 5: Reassignment, Severity & User Administration**
   - [ ] Implement the administrator reassignment view with smart candidate suggestions.
