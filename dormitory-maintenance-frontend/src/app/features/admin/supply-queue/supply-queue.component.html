@@ -1,0 +1,134 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Administrator Supply Requests Queue</h1>
+      <p class="text-sm text-gray-500">Procure requested supplies, set expected arrival times, and track delivery status.</p>
+    </div>
+    <div class="mt-4 md:mt-0 flex space-x-3">
+      <button
+        (click)="loadSupplyRequests()"
+        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs"
+      >
+        🔄 Refresh Queue
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="flex space-x-2 border-b border-gray-200 pb-4 mb-6">
+    <button
+      (click)="setStatusFilter('all')"
+      [class]="selectedStatusFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+    >
+      All Requests
+    </button>
+    <button
+      (click)="setStatusFilter('requested')"
+      [class]="selectedStatusFilter === 'requested' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+    >
+      Requested
+    </button>
+    <button
+      (click)="setStatusFilter('ordered')"
+      [class]="selectedStatusFilter === 'ordered' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+    >
+      Ordered
+    </button>
+    <button
+      (click)="setStatusFilter('delivered')"
+      [class]="selectedStatusFilter === 'delivered' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+    >
+      Delivered
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-12">
+      <p class="text-sm text-gray-500">Loading supply requests...</p>
+    </div>
+  } @else if (error) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm mb-6">
+      {{ error }}
+    </div>
+  } @else {
+    @if (filteredRequests.length > 0) {
+      <div class="space-y-6">
+        @for (req of filteredRequests; track req.id) {
+          <div class="bg-white rounded-lg shadow-xs border border-gray-200 p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="space-y-3 flex-1">
+              <div class="flex items-center space-x-3">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize {{ req.status === 'Requested' ? 'bg-yellow-100 text-yellow-800' : req.status === 'Ordered' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                  {{ req.status }}
+                </span>
+                <span class="text-xs text-gray-500">Quantity: <strong class="text-gray-700">{{ req.quantity }}</strong></span>
+                <span class="text-xs text-gray-500">Requested: <strong class="text-gray-700">{{ req.createdAt | date:'medium' }}</strong></span>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ req.item }}</h3>
+                <p class="text-sm text-gray-600 mt-1"><span class="font-medium text-gray-700">Justification:</span> {{ req.justification }}</p>
+              </div>
+
+              <div class="flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500 pt-1">
+                <span>Janitor: <strong class="text-gray-700">{{ req.janitorName || req.janitorId }}</strong></span>
+                <span>Report ID: <a [routerLink]="['/student', req.reportId]" class="text-indigo-600 hover:underline font-medium">{{ req.reportId }}</a></span>
+              </div>
+            </div>
+
+            <!-- Management controls: expected arrival time & status transition buttons -->
+            <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-start sm:items-center lg:items-start xl:items-center gap-4 bg-gray-50 p-4 rounded-md border border-gray-200">
+              <div class="w-full sm:w-auto">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Expected Arrival Time</label>
+                <input
+                  type="text"
+                  [(ngModel)]="arrivalTimes[req.id]"
+                  placeholder="e.g. Tomorrow 14:00"
+                  class="block w-full sm:w-48 rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 text-xs py-1.5 px-3 border bg-white"
+                />
+              </div>
+
+              <div class="flex items-center space-x-2 pt-2 sm:pt-0 lg:pt-2 xl:pt-0">
+                @if (req.status === 'Requested') {
+                  <button
+                    (click)="updateStatus(req.id, 'Ordered')"
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-xs"
+                  >
+                    Mark Ordered
+                  </button>
+                }
+                @if (req.status !== 'Delivered') {
+                  <button
+                    (click)="updateStatus(req.id, 'Delivered')"
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 shadow-xs"
+                  >
+                    Mark Delivered
+                  </button>
+                }
+                @if (req.status === 'Ordered') {
+                  <button
+                    (click)="updateStatus(req.id, 'Ordered')"
+                    class="inline-flex items-center px-3 py-2 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-xs"
+                  >
+                    Save Arrival
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-16 bg-white rounded-lg border border-gray-200">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No supply requests found</h3>
+        <p class="mt-1 text-sm text-gray-500">There are no supply requests matching the selected filter.</p>
+      </div>
+    }
+  }
+</div>

@@ -46,7 +46,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard(['admin'])],
-    loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent), // Placeholder until Phase 4/5
+    loadComponent: () => import('./features/admin/supply-queue/supply-queue.component').then((m) => m.SupplyQueueComponent),
   },
   {
     path: '',
