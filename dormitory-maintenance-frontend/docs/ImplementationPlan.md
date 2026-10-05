@@ -99,9 +99,9 @@ src/app/
   - [X] Expected arrival is written in a text field by the administrator as the supply and suppliers management is not in scope for the current version.  
   - [X] Build supply notification states and "ready to resume" flags.
 
-- [ ] **Phase 5: Reassignment, Severity & User Administration**
-  - [ ] Implement the administrator reassignment view with smart candidate suggestions.
-  - [ ] Build severity adjustment and comprehensive user management (single/CSV import, roles, specializations).
+- [X] **Phase 5: Reassignment, Severity & User Administration**
+  - [X] Implement the administrator reassignment view with smart candidate suggestions.
+  - [X] Build severity adjustment and comprehensive user management (single/CSV import, roles, specializations).
 
 - [ ] **Phase 6: Real-Time WebSocket, Polish & Testing**
   - [ ] Integrate WebSocket effects for live notifications (`report.created`, `report.updated`, etc.).
