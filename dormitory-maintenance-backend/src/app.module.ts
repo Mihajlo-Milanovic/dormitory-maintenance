@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { JobsModule } from './jobs/jobs.module.js';
+import { SuppliesModule } from './supplies/supplies.module.js';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { JobsModule } from './jobs/jobs.module.js';
     UsersModule,
     ReportsModule,
     JobsModule,
+    SuppliesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
