@@ -12,6 +12,7 @@ import {
 import { ReportsService } from './reports.service.js';
 import { CreateReportDto } from './dto/create-report.dto.js';
 import { UpdateReportDto } from './dto/update-report.dto.js';
+import { ReassignReportDto } from './dto/reassign-report.dto.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
@@ -61,5 +62,16 @@ export class ReportsController {
   @HttpCode(HttpStatus.OK)
   acceptJob(@CurrentUser() user: any, @Param('id') id: string) {
     return this.reportsService.acceptJob(user.id, id);
+  }
+
+  @Post(':id/reassign')
+  @Roles(Role.administrator)
+  @HttpCode(HttpStatus.OK)
+  reassign(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() dto: ReassignReportDto,
+  ) {
+    return this.reportsService.reassign(user.id, id, dto);
   }
 }

@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateReportDto } from './dto/create-report.dto.js';
 import { UpdateReportDto } from './dto/update-report.dto.js';
+import { ReassignReportDto } from './dto/reassign-report.dto.js';
 import { Role, ReportStatus, EventType, Severity } from '@prisma/client';
 
 @Injectable()
@@ -192,6 +193,75 @@ export class ReportsService {
           fromStatus: ReportStatus.Waiting,
           toStatus: ReportStatus.Cancelled,
           comment: 'Report cancelled by student',
+        },
+      });
+
+      return updated;
+    });
+  }
+
+  async reassign(adminId: string, reportId: string, dto: ReassignReportDto) {
+    const report = await this.prisma.report.findUnique({
+      where: { id: reportId },
+      include: { jobs: { where: { finishedAt: null } } },
+    });
+
+    if (!report) {
+      throw new NotFoundException(`Report with ID ${reportId} not found`);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // Close any active jobs for this report
+      await tx.job.updateMany({
+        where: { reportId, finishedAt: null },
+        data: { finishedAt: new Date() },
+      });
+
+      let newStatus: ReportStatus = ReportStatus.Waiting;
+      let comment = dto.comment || 'Report reassigned by administrator';
+
+      if (dto.newJanitorId) {
+        const janitor = await tx.user.findUnique({
+          where: { id: dto.newJanitorId, role: Role.janitor },
+        });
+        if (!janitor || !janitor.active) {
+          throw new BadRequestException('Invalid or inactive janitor ID');
+        }
+
+        await tx.job.create({
+          data: {
+            reportId,
+            janitorId: dto.newJanitorId,
+            startedAt: new Date(),
+          },
+        });
+        newStatus = ReportStatus.Accepted;
+        comment = `Report reassigned to janitor ${janitor.name}`;
+      }
+
+      const updated = await tx.report.update({
+        where: { id: reportId },
+        data: { status: newStatus },
+        include: { jobs: { include: { janitor: true } } },
+      });
+
+      await tx.reportEvent.create({
+        data: {
+          reportId,
+          actorId: adminId,
+          eventType: EventType.status_change,
+          fromStatus: report.status,
+          toStatus: newStatus,
+          comment,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: adminId,
+          action: 'REASSIGN_REPORT',
+          targetUserId: dto.newJanitorId,
+          newValue: JSON.stringify({ reportId, newStatus, newJanitorId: dto.newJanitorId }),
         },
       });
 
