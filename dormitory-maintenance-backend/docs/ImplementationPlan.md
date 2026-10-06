@@ -133,7 +133,7 @@ src/
   - Implement race-safe job acceptance with the one-active-job constraint using Prisma transactions.
   - Implement job time estimation, status transitions (`Repair in progress`, `Finished`), and supply request creation.
 
-- [ ] **Phase 4: Supply Management & Administrator Reassignment**
+- [x] **Phase 4: Supply Management & Administrator Reassignment**
   - Implement administrator supply queue management (`Ordered`, `Delivered`, expected arrival time `arrivalAt`).
   - Implement administrator emergency reassignment endpoint (`POST :id/reassign`) and severity override with audit logging.
 
