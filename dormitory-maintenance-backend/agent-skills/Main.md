@@ -79,3 +79,17 @@ export class UsersService {
   }
 }
 ```
+
+## Testing 
+
+Test everything before commiting. Commit only after all tests pass.
+
+
+## Git & Source Control Conventions
+- **Conventional Commits:** Enforce the [Conventional Commits Specification](https://www.conventionalcommits.org/ "Conventional Commits Specification"). Every message must follow: `<type>(<scope>): <description>`.
+    - *Types:* `feat`, `fix`, `refactor`, `style`, `docs`, `perf`, `test`, `build`, `ci`, `chore`.
+- **Commits:** Commit granularly with a concise, clear, and descriptive message per commit.
+- **Log Context & Pattern Matching:** Before drafting any message, analyze the repository's recent commit history (the current log). Mimic the existing team conventions:
+    - Match how `<scope>` is defined (e.g., matching actual folder names like `+state`, domain features like `products`, or architectural layers like `shared/ui`).
+    - Match casing preferences (e.g., lower-case descriptions, imperative mood such as "add feature" instead of "added feature").
+- **Safety Formatting:** Output plain text options. Never wrap commit messages in extra Markdown code blocks or backticks unless requested, ensuring the text can be piped directly into `git commit -m`.
