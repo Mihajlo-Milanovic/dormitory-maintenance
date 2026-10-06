@@ -120,7 +120,7 @@ src/
 
 ## 5. Implementation Milestones & Phases
 
-- [ ] **Phase 1: Project Setup, Prisma Schema & Authentication**
+- [x] **Phase 1: Project Setup, Prisma Schema & Authentication**
   - Initialize NestJS modules, configure global `PrismaService`, and write the complete Prisma schema (`schema.prisma`).
   - Implement Passport.js local & JWT strategies, token rotation, password hashing (Argon2id), and auth controllers/guards.
 
