@@ -128,7 +128,7 @@ src/
   - Implement User service and controller for single creation, CSV bulk import, role assignment, and janitor specializations with audit logging.
   - Implement account activation and password reset email token flows.
 
-- [ ] **Phase 3: Reports & Job Execution Workflow**
+- [x] **Phase 3: Reports & Job Execution Workflow**
   - Implement Report creation, role-scoped querying, timeline events (`ReportEvent`), and student edit/cancel actions.
   - Implement race-safe job acceptance with the one-active-job constraint using Prisma transactions.
   - Implement job time estimation, status transitions (`Repair in progress`, `Finished`), and supply request creation.
