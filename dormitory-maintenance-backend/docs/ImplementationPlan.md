@@ -124,7 +124,7 @@ src/
   - Initialize NestJS modules, configure global `PrismaService`, and write the complete Prisma schema (`schema.prisma`).
   - Implement Passport.js local & JWT strategies, token rotation, password hashing (Argon2id), and auth controllers/guards.
 
-- [ ] **Phase 2: User Management & RBAC**
+- [x] **Phase 2: User Management & RBAC**
   - Implement User service and controller for single creation, CSV bulk import, role assignment, and janitor specializations with audit logging.
   - Implement account activation and password reset email token flows.
 
