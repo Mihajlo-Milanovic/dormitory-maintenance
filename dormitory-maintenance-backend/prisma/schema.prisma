@@ -1,0 +1,196 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  student
+  janitor
+  administrator
+}
+
+enum Category {
+  plumbing
+  electrical
+  furniture
+  heating
+  other
+}
+
+enum Severity {
+  Low
+  Medium
+  High
+  Critical
+}
+
+enum ReportStatus {
+  Waiting
+  Accepted
+  Repair_in_progress @map("Repair in progress")
+  Waiting_for_supplies @map("Waiting for supplies")
+  Finished
+  Cancelled
+}
+
+enum SupplyStatus {
+  requested
+  ordered
+  delivered
+}
+
+enum EventType {
+  status_change @map("status change")
+  severity_change @map("severity change")
+}
+
+model User {
+  id               String                 @id @default(uuid())
+  name             String
+  email            String                 @unique
+  passwordHash     String
+  role             Role
+  active           Boolean                @default(true)
+  roomNumber       String?                // students only, nullable
+  activatedAt      DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  specializations  JanitorSpecialization[]
+  reports          Report[]               @relation("StudentReports")
+  jobs             Job[]                  @relation("JanitorJobs")
+  auditLogsActor   AuditLog[]             @relation("ActorAuditLogs")
+  auditLogsTarget  AuditLog[]             @relation("TargetUserAuditLogs")
+  activationTokens ActivationToken[]
+  refreshTokens    RefreshToken[]
+  reportEvents     ReportEvent[]
+  supplyRequests   SupplyRequest[]
+  notifications    Notification[]
+}
+
+model JanitorSpecialization {
+  id        String   @id @default(uuid())
+  janitorId String
+  category  Category
+
+  janitor   User     @relation(fields: [janitorId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  actorId      String
+  action       String
+  targetUserId String?
+  oldValue     String?
+  newValue     String?
+  at           DateTime @default(now())
+
+  actor        User     @relation("ActorAuditLogs", fields: [actorId], references: [id])
+  targetUser   User?    @relation("TargetUserAuditLogs", fields: [targetUserId], references: [id])
+}
+
+model ActivationToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  family    String
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Report {
+  id          String       @id @default(uuid())
+  studentId   String
+  category    Category
+  title       String
+  description String
+  location    String       // free-form description
+  severity    Severity
+  status      ReportStatus @default(Waiting)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  student     User         @relation("StudentReports", fields: [studentId], references: [id])
+  jobs        Job[]
+  events      ReportEvent[]
+  attachments Attachment[]
+}
+
+model Job {
+  id              String         @id @default(uuid())
+  reportId        String
+  janitorId       String
+  estimateMinutes Int?
+  startedAt       DateTime       @default(now())
+  finishedAt      DateTime?
+
+  report          Report         @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  janitor         User           @relation("JanitorJobs", fields: [janitorId], references: [id])
+  supplyRequests  SupplyRequest[]
+}
+
+model ReportEvent {
+  id           String       @id @default(uuid())
+  reportId     String
+  actorId      String
+  eventType    EventType
+  fromStatus   ReportStatus?
+  toStatus     ReportStatus?
+  fromSeverity Severity?
+  toSeverity   Severity?
+  comment      String?
+  at           DateTime     @default(now())
+
+  report       Report       @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  actor        User         @relation(fields: [actorId], references: [id])
+}
+
+model SupplyRequest {
+  id            String       @id @default(uuid())
+  jobId         String
+  janitorId     String
+  item          String
+  quantity      Int
+  justification String?
+  status        SupplyStatus @default(requested)
+  arrivalAt     DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  job           Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  janitor       User         @relation(fields: [janitorId], references: [id])
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  reportId  String
+  url       String
+
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
+  payload   Json      // JSON payload
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
