@@ -1,0 +1,13 @@
+node_modules
+dist
+.angular
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+docs
+.vscode
+.idea
+agent-skils
+GEMINI.md
