@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 import { JobsModule } from './jobs/jobs.module.js';
 import { SuppliesModule } from './supplies/supplies.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SuppliesModule } from './supplies/supplies.module.js';
     ReportsModule,
     JobsModule,
     SuppliesModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
