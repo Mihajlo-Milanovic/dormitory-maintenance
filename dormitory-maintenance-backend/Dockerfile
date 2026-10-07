@@ -1,44 +1,61 @@
-# Stage 1: Build the app
+# =========================
+# Stage 1: Build
+# =========================
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies first (leveraging cache)
+# Install all dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy Prisma schema and generate Prisma Client
+# Prisma configuration and schema
+COPY prisma.config.ts ./
 COPY prisma ./prisma/
-RUN npx prisma generate
 
-# Copy source code and build
+# Generate Prisma Client
+RUN npx prisma generate
+RUN npx prisma migrate
+
+# Application source
 COPY tsconfig*.json ./
 COPY src ./src/
+
+# Build application
 RUN npm run build
 
-# Stage 2: Production image
+
+# =========================
+# Stage 2: Production
+# =========================
 FROM node:22-alpine AS production
 
 WORKDIR /app
 
-# Set production environment
 ENV NODE_ENV=production
 
-# Copy package files and install production dependencies
+# Install production dependencies
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# Copy generated prisma client and prisma schema
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Prisma configuration and schema
+COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/prisma ./prisma
 
-# Copy built application from builder stage
+# Prisma generated client
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Compiled application
 COPY --from=builder /app/dist ./dist
 
-# Create a non-root user and switch to it
+# Startup script
+COPY docker/docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
+# Run as non-root
 USER node
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+ENTRYPOINT ["./docker-entrypoint.sh"]

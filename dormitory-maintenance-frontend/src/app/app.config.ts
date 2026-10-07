@@ -7,7 +7,7 @@ import { provideEffects } from '@ngrx/effects';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
-import { mockInterceptor } from './core/interceptors/mock.interceptor';
+// import { mockInterceptor } from './core/interceptors/mock.interceptor';
 import { authReducer } from './features/auth/state/auth.reducer';
 import { AuthEffects } from './features/auth/state/auth.effects';
 import { studentReportReducer } from './features/student/state/student-report.reducer';
@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, mockInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor/*, mockInterceptor*/])),
     provideStore({
       auth: authReducer,
       studentReports: studentReportReducer,
