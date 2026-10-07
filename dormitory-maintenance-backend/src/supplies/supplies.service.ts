@@ -4,12 +4,16 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { UpdateSupplyRequestDto } from './dto/update-supply-request.dto.js';
 import { Role } from '@prisma/client';
 
 @Injectable()
 export class SuppliesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async findAll(user: { id: string; role: Role }) {
     if (user.role === Role.janitor) {
@@ -62,6 +66,9 @@ export class SuppliesService {
 
       return u;
     });
+
+    void this.notifications.createAndSend(updated.janitorId, 'supply.updated', updated);
+    void this.notifications.broadcastToRole('administrator', 'supply.updated', updated);
 
     return updated;
   }
