@@ -5,13 +5,17 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { UpdateJobDto } from './dto/update-job.dto.js';
 import { CreateSupplyRequestDto } from './dto/create-supply-request.dto.js';
 import { ReportStatus, EventType } from '@prisma/client';
 
 @Injectable()
 export class JobsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async update(janitorId: string, jobId: string, dto: UpdateJobDto) {
     const job = await this.prisma.job.findUnique({
@@ -27,7 +31,7 @@ export class JobsService {
       throw new ForbiddenException('Job is not assigned to this janitor');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const updatedJob = await this.prisma.$transaction(async (tx) => {
       const updateData: any = {};
       if (dto.estimateMinutes !== undefined) {
         updateData.estimateMinutes = dto.estimateMinutes;
@@ -63,14 +67,19 @@ export class JobsService {
         });
       }
 
-      const updatedJob = await tx.job.update({
+      const up = await tx.job.update({
         where: { id: jobId },
         data: updateData,
         include: { report: { include: { attachments: true } }, supplyRequests: true },
       });
 
-      return updatedJob;
+      return up;
     });
+
+    void this.notifications.broadcastToRole('administrator', 'report.updated', updatedJob);
+    void this.notifications.createAndSend(job.report.studentId, 'report.updated', updatedJob);
+
+    return updatedJob;
   }
 
   async createSupplyRequest(
@@ -91,8 +100,8 @@ export class JobsService {
       throw new ForbiddenException('Job is not assigned to this janitor');
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const supplyRequest = await tx.supplyRequest.create({
+    const supplyRequest = await this.prisma.$transaction(async (tx) => {
+      const sr = await tx.supplyRequest.create({
         data: {
           jobId,
           janitorId,
@@ -118,7 +127,12 @@ export class JobsService {
         },
       });
 
-      return supplyRequest;
+      return sr;
     });
+
+    void this.notifications.broadcastToRole('administrator', 'supply.updated', supplyRequest);
+    void this.notifications.createAndSend(janitorId, 'supply.updated', supplyRequest);
+
+    return supplyRequest;
   }
 }
