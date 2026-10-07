@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dormitory_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dormitory_maintenance
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - database-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dormitory_maintenance"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./dormitory-maintenance-backend
+      dockerfile: Dockerfile
+    container_name: dormitory_backend
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/dormitory_maintenance?schema=public
+      - JWT_SECRET=super-secret-jwt-key-dormitory-maintenance
+      - JWT_REFRESH_SECRET=super-secret-refresh-key-dormitory-maintenance
+      - PORT=3000
+    networks:
+      - database-net
+      - frontend-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./dormitory-maintenance-frontend
+      dockerfile: Dockerfile
+    container_name: dormitory_frontend
+    ports:
+      - "80:80"
+    networks:
+      - frontend-net
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  database-net:
+    driver: bridge
+  frontend-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
