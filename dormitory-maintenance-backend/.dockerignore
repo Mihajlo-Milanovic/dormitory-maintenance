@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.env
+development.env
+coverage
+.vscode
+*.log
+README.md
+docs
+test
+agent-skills
+.oxlintrc.json
+.prettierrc
