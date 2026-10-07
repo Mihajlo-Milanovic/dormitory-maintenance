@@ -14,7 +14,7 @@
               @if ((userRole$ | async) === 'janitor') {
                 <a routerLink="/janitor" routerLinkActive="bg-indigo-50 text-indigo-700" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Job Feed</a>
               }
-              @if ((userRole$ | async) === 'admin') {
+              @if ((userRole$ | async) === 'administrator') {
                 <a routerLink="/admin" routerLinkActive="bg-indigo-50 text-indigo-700" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Admin Dashboard</a>
               }
             </div>

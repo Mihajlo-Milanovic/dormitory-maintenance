@@ -29,7 +29,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(({ user }) => {
-          if (user.role === 'admin') {
+          if (user.role === 'administrator') {
             this.router.navigate(['/admin']);
           } else if (user.role === 'janitor') {
             this.router.navigate(['/janitor']);

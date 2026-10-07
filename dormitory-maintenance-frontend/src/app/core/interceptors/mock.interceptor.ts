@@ -82,7 +82,7 @@ let mockSupplies: SupplyRequest[] = [
 let mockUsers: User[] = [
   { id: 'stu-1', email: 'student@dorm.edu', name: 'Alice Student', role: 'student', isActive: true, createdAt: new Date().toISOString() },
   { id: 'jan-1', email: 'janitor@dorm.edu', name: 'John Janitor', role: 'janitor', specialization: 'plumbing', isActive: true, createdAt: new Date().toISOString() },
-  { id: 'adm-1', email: 'admin@dorm.edu', name: 'Admin User', role: 'admin', isActive: true, createdAt: new Date().toISOString() },
+  { id: 'adm-1', email: 'admin@dorm.edu', name: 'Admin User', role: 'administrator', isActive: true, createdAt: new Date().toISOString() },
 ];
 
 let mockNotifications: AppNotification[] = [

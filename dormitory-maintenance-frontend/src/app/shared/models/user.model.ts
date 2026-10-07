@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'janitor' | 'admin';
+export type UserRole = 'student' | 'janitor' | 'administrator';
 
 export type JanitorSpecialization = 'plumbing' | 'electrical' | 'furniture' | 'heating' | 'other';
 
