@@ -6,14 +6,18 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { CreateReportDto } from './dto/create-report.dto.js';
 import { UpdateReportDto } from './dto/update-report.dto.js';
 import { ReassignReportDto } from './dto/reassign-report.dto.js';
-import { Role, ReportStatus, EventType, Severity } from '@prisma/client';
+import { Role, ReportStatus, EventType } from '@prisma/client';
 
 @Injectable()
 export class ReportsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async create(studentId: string, dto: CreateReportDto) {
     const report = await this.prisma.$transaction(async (tx) => {
@@ -48,7 +52,11 @@ export class ReportsService {
       return newReport;
     });
 
-    return this.findOne({ id: studentId, role: Role.student }, report.id);
+    const fullReport = await this.findOne({ id: studentId, role: Role.student }, report.id);
+    void this.notifications.broadcastToCategory(dto.category, 'report.created', fullReport);
+    void this.notifications.broadcastToRole('administrator', 'report.created', fullReport);
+
+    return fullReport;
   }
 
   async findAll(user: { id: string; role: Role }) {
@@ -61,7 +69,6 @@ export class ReportsService {
     }
 
     if (user.role === Role.janitor) {
-      // Janitor sees reports matching their specializations or jobs assigned to them
       const janitorSpecs = await this.prisma.janitorSpecialization.findMany({
         where: { janitorId: user.id },
       });
@@ -79,9 +86,8 @@ export class ReportsService {
       });
     }
 
-    // Administrator sees all reports
     return this.prisma.report.findMany({
-      include: { attachments: true, jobs: { include: { janitor: true }, }, student: true },
+      include: { attachments: true, jobs: { include: { janitor: true } }, student: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -115,7 +121,7 @@ export class ReportsService {
       if (report.status !== ReportStatus.Waiting) {
         throw new BadRequestException('Cannot edit report after it has been accepted or processed');
       }
-      return this.prisma.report.update({
+      const updated = await this.prisma.report.update({
         where: { id },
         data: {
           category: dto.category,
@@ -125,10 +131,12 @@ export class ReportsService {
         },
         include: { attachments: true },
       });
+      void this.notifications.broadcastToRole('administrator', 'report.updated', updated);
+      return updated;
     }
 
     if (user.role === Role.administrator) {
-      return this.prisma.$transaction(async (tx) => {
+      const updated = await this.prisma.$transaction(async (tx) => {
         const updateData: any = {};
         let eventData: any = null;
 
@@ -156,7 +164,7 @@ export class ReportsService {
           };
         }
 
-        const updated = await tx.report.update({
+        const up = await tx.report.update({
           where: { id },
           data: updateData,
           include: { attachments: true, jobs: true },
@@ -166,8 +174,12 @@ export class ReportsService {
           await tx.reportEvent.create({ data: eventData });
         }
 
-        return updated;
+        return up;
       });
+
+      void this.notifications.createAndSend(report.studentId, 'report.updated', updated);
+      void this.notifications.broadcastToRole('administrator', 'report.updated', updated);
+      return updated;
     }
 
     throw new ForbiddenException('Unauthorized to update report');
@@ -179,8 +191,8 @@ export class ReportsService {
       throw new BadRequestException('Can only cancel reports that are waiting');
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.report.update({
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const up = await tx.report.update({
         where: { id },
         data: { status: ReportStatus.Cancelled },
       });
@@ -196,8 +208,11 @@ export class ReportsService {
         },
       });
 
-      return updated;
+      return up;
     });
+
+    void this.notifications.broadcastToRole('administrator', 'report.updated', updated);
+    return updated;
   }
 
   async reassign(adminId: string, reportId: string, dto: ReassignReportDto) {
@@ -210,8 +225,7 @@ export class ReportsService {
       throw new NotFoundException(`Report with ID ${reportId} not found`);
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      // Close any active jobs for this report
+    const updated = await this.prisma.$transaction(async (tx) => {
       await tx.job.updateMany({
         where: { reportId, finishedAt: null },
         data: { finishedAt: new Date() },
@@ -239,7 +253,7 @@ export class ReportsService {
         comment = `Report reassigned to janitor ${janitor.name}`;
       }
 
-      const updated = await tx.report.update({
+      const up = await tx.report.update({
         where: { id: reportId },
         data: { status: newStatus },
         include: { jobs: { include: { janitor: true } } },
@@ -265,12 +279,19 @@ export class ReportsService {
         },
       });
 
-      return updated;
+      return up;
     });
+
+    void this.notifications.createAndSend(report.studentId, 'report.updated', updated);
+    void this.notifications.broadcastToRole('administrator', 'job.reassigned', updated);
+    if (dto.newJanitorId) {
+      void this.notifications.createAndSend(dto.newJanitorId, 'job.reassigned', updated);
+    }
+
+    return updated;
   }
 
   async acceptJob(janitorId: string, reportId: string) {
-    // Check if janitor already has an active job (finishedAt is null)
     const activeJob = await this.prisma.job.findFirst({
       where: { janitorId, finishedAt: null },
     });
@@ -279,7 +300,7 @@ export class ReportsService {
       throw new ConflictException('Janitor already has an active job. Complete or pause current job first.');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const report = await tx.report.findUnique({ where: { id: reportId } });
       if (!report) {
         throw new NotFoundException(`Report with ID ${reportId} not found`);
@@ -288,7 +309,7 @@ export class ReportsService {
         throw new BadRequestException('Report is no longer waiting for acceptance');
       }
 
-      const job = await tx.job.create({
+      const j = await tx.job.create({
         data: {
           reportId,
           janitorId,
@@ -312,7 +333,10 @@ export class ReportsService {
         },
       });
 
-      return job;
+      return j;
     });
+
+    void this.notifications.broadcastToRole('administrator', 'report.updated', job);
+    return job;
   }
 }
