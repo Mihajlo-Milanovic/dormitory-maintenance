@@ -9,7 +9,8 @@ export default {
     changeOrigin: true,
     pathRewrite: { '^/api': '/api/v1' },
   },
-  '/ws': {
+  // Vite requires a glob to match nested Socket.IO transport requests.
+  '/ws/**': {
     target,
     changeOrigin: true,
     ws: true,

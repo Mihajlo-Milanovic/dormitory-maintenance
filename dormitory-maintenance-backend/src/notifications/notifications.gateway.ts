@@ -9,7 +9,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @WebSocketGateway({
-  namespace: 'ws',
+  namespace: '/ws',
+  path: '/ws/socket.io',
   cors: {
     origin: '*',
   },
@@ -32,11 +33,19 @@ export class NotificationsGateway
         client.handshake.headers?.authorization?.replace('Bearer ', '');
 
       if (!token) {
+        client.emit('auth.rejected');
         client.disconnect();
         return;
       }
 
-      const payload = this.jwtService.verify(token);
+      let payload;
+      try {
+        payload = this.jwtService.verify(token);
+      } catch {
+        client.emit('auth.rejected');
+        client.disconnect();
+        return;
+      }
       client.data.user = payload;
 
       const userId = payload.sub;
