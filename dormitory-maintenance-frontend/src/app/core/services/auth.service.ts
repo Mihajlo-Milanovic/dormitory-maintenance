@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
 import { LoginRequest, LoginResponse, RefreshTokenResponse } from '../../shared/models/auth.model';
 import { User } from '../../shared/models/user.model';
@@ -10,12 +10,14 @@ import { User } from '../../shared/models/user.model';
 export class AuthService {
   private readonly api = inject(ApiService);
   private accessToken: string | null = null;
+  private readonly tokenSubject = new BehaviorSubject<string | null>(null);
+  readonly accessToken$ = this.tokenSubject.asObservable();
 
   constructor() {
     // Restore token from session storage on init if present
     const savedToken = sessionStorage.getItem('access_token');
     if (savedToken) {
-      this.accessToken = savedToken;
+      this.setAccessToken(savedToken);
     }
   }
 
@@ -26,6 +28,7 @@ export class AuthService {
     } else {
       sessionStorage.removeItem('access_token');
     }
+    this.tokenSubject.next(token);
   }
 
   getAccessToken(): string | null {
