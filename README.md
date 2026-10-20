@@ -61,3 +61,27 @@ dormitory-maintenance/
    ```bash
    docker compose down
    ```
+
+### Frontend development with live reload
+
+From the repository root, run:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+Open [http://localhost:4200](http://localhost:4200). The frontend runs the Angular development server using `dormitory-maintenance-frontend/Dockerfile.dev`. Source files are mounted into the container, so saving frontend changes triggers a rebuild and browser update. File polling checks for changes every second, including on Docker Desktop.
+
+The backend and database start alongside the frontend. API and WebSocket requests are proxied to the backend container. Container volumes keep frontend dependencies and Angular's cache separate from the host.
+
+After changing `package.json` or `package-lock.json`, rebuild and refresh the dependency volume:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build --force-recreate --renew-anon-volumes frontend
+```
+
+To stop the development stack:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+```
