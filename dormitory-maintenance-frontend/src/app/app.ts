@@ -6,8 +6,9 @@ import { selectIsAuthenticated, selectCurrentUser, selectUserRole } from './feat
 import { AuthActions } from './features/auth/state/auth.actions';
 import { NotificationService } from './core/services/notification.service';
 import { WebSocketService } from './core/services/websocket.service';
+import { mergeNotifications } from './shared/models/notification.mapper';
 import { AppNotification } from './shared/models/notification.model';
-import { Subscription } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +21,9 @@ export class App implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly notificationService = inject(NotificationService);
   private readonly webSocketService = inject(WebSocketService);
-  private wsSub?: Subscription;
+  private authSub?: Subscription;
+  private sessionSub = new Subscription();
+  private refreshSub?: Subscription;
 
   protected readonly isAuthenticated$ = this.store.select(selectIsAuthenticated);
   protected readonly currentUser$ = this.store.select(selectCurrentUser);
@@ -30,51 +33,47 @@ export class App implements OnInit, OnDestroy {
   protected showNotificationsDropdown = false;
 
   ngOnInit(): void {
-    this.isAuthenticated$.subscribe((auth) => {
-      if (auth) {
-        this.webSocketService.connect();
-        this.loadNotifications();
-        this.wsSub = this.webSocketService.onMessage().subscribe((msg) => {
-          if (msg && msg.type) {
-            this.notifications = [
-              {
-                id: msg.id || Date.now().toString(),
-                userId: msg.userId || '',
-                title: msg.title || 'New Update',
-                message: msg.message || JSON.stringify(msg),
-                type: msg.type,
-                isRead: false,
-                createdAt: msg.createdAt || new Date().toISOString(),
-              },
-              ...this.notifications,
-            ];
+    this.authSub = combineLatest([this.isAuthenticated$, this.currentUser$]).pipe(
+      map(([auth, user]) => auth ? user?.id ?? null : null),
+      distinctUntilChanged(),
+    ).subscribe((userId) => {
+      this.endNotificationSession();
+      if (userId) {
+        this.sessionSub = new Subscription();
+        this.sessionSub.add(this.webSocketService.onMessage().subscribe((msg) => {
+          if (msg.userId === userId) {
+            this.notifications = mergeNotifications(this.notifications, [msg]);
           }
-        });
-      } else {
-        this.webSocketService.disconnect();
-        if (this.wsSub) {
-          this.wsSub.unsubscribe();
-        }
+        }));
+        this.sessionSub.add(this.webSocketService.onConnected().subscribe(() => this.loadNotifications()));
+        this.loadNotifications();
+        this.webSocketService.connect();
       }
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.wsSub) {
-      this.wsSub.unsubscribe();
-    }
+  private endNotificationSession(): void {
+    this.sessionSub.unsubscribe();
     this.webSocketService.disconnect();
+    this.notifications = [];
+    this.showNotificationsDropdown = false;
+  }
+
+  ngOnDestroy(): void {
+    this.authSub?.unsubscribe();
+    this.endNotificationSession();
   }
 
   loadNotifications(): void {
-    this.notificationService.getNotifications().subscribe({
+    this.refreshSub?.unsubscribe();
+    this.refreshSub = this.notificationService.getNotifications().subscribe({
       next: (notifs) => {
-        this.notifications = notifs;
+        this.notifications = mergeNotifications(this.notifications, notifs);
       },
-      error: () => {
-        this.notifications = [];
-      },
+      // Preserve the current list when refresh fails; retry on the next connection.
+      error: () => {},
     });
+    this.sessionSub.add(this.refreshSub);
   }
 
   get unreadCount(): number {
@@ -86,28 +85,25 @@ export class App implements OnInit, OnDestroy {
   }
 
   markAsRead(id: string): void {
-    this.notificationService.markAsRead(id).subscribe({
-      next: () => {
-        this.notifications = this.notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+    this.sessionSub.add(this.notificationService.markAsRead(id).subscribe({
+      next: (notification) => {
+        this.notifications = mergeNotifications(this.notifications, [notification]);
       },
-      error: () => {
-        this.notifications = this.notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-      },
-    });
+      error: () => {},
+    }));
   }
 
   markAllAsRead(): void {
-    this.notificationService.markAllAsRead().subscribe({
-      next: () => {
-        this.notifications = this.notifications.map((n) => ({ ...n, isRead: true }));
+    this.sessionSub.add(this.notificationService.markAllAsRead().subscribe({
+      next: (notifications) => {
+        this.notifications = mergeNotifications(this.notifications, notifications);
       },
-      error: () => {
-        this.notifications = this.notifications.map((n) => ({ ...n, isRead: true }));
-      },
-    });
+      error: () => this.loadNotifications(),
+    }));
   }
 
   protected onLogout(): void {
+    this.endNotificationSession();
     this.store.dispatch(AuthActions.logout());
   }
 }
