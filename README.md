@@ -72,6 +72,10 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 Open [http://localhost:4200](http://localhost:4200). The frontend runs the Angular development server using `dormitory-maintenance-frontend/Dockerfile.dev`. Source files are mounted into the container, so saving frontend changes triggers a rebuild and browser update. File polling checks for changes every second, including on Docker Desktop.
 
+You can also run `npm run docker-live` from `dormitory-maintenance-frontend`. Use port `4200` for development; port `80` serves the production build. Development uses full page reloads instead of component hot updates. After changing `Dockerfile.dev` or `proxy.conf.mjs`, restart with the command above.
+
+The seeded administrator login is `admin@dorm.com` / `admin123!` (an existing administrator's password is preserved).
+
 The backend and database start alongside the frontend. API and WebSocket requests are proxied to the backend container. Container volumes keep frontend dependencies and Angular's cache separate from the host.
 
 After changing `package.json` or `package-lock.json`, rebuild and refresh the dependency volume:
