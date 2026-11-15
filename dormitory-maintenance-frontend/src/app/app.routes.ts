@@ -4,19 +4,10 @@ import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
-    path: 'auth/login',
-    loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent),
-  },
-  {
     path: 'admin',
     canActivate: [authGuard, roleGuard(['administrator'])],
     loadComponent: () => import('./features/admin/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     children: [
-      {
-        path: '',
-        redirectTo: '',
-        pathMatch: 'full',
-      },
       {
         path: 'supplies',
         loadComponent: () => import('./features/admin/supply-queue/supply-queue.component').then((m) => m.SupplyQueueComponent),
@@ -29,16 +20,17 @@ export const routes: Routes = [
         path: 'users',
         loadComponent: () => import('./features/admin/user-management/user-management.component').then((m) => m.UserManagementComponent),
       },
+      {
+        path: '',
+        redirectTo: '',
+        pathMatch: 'full',
+      },
     ],
   },
   {
     path: 'student',
     canActivate: [authGuard, roleGuard(['student'])],
     children: [
-      {
-        path: '',
-        loadComponent: () => import('./features/student/report-list/report-list.component').then((m) => m.ReportListComponent),
-      },
       {
         path: 'new',
         loadComponent: () => import('./features/student/report-create/report-create.component').then((m) => m.ReportCreateComponent),
@@ -47,16 +39,16 @@ export const routes: Routes = [
         path: ':id',
         loadComponent: () => import('./features/student/report-detail/report-detail.component').then((m) => m.ReportDetailComponent),
       },
+      {
+        path: '',
+        loadComponent: () => import('./features/student/report-list/report-list.component').then((m) => m.ReportListComponent),
+      },
     ],
   },
   {
     path: 'janitor',
     canActivate: [authGuard, roleGuard(['janitor'])],
     children: [
-      {
-        path: '',
-        loadComponent: () => import('./features/janitor/janitor-feed/janitor-feed.component').then((m) => m.JanitorFeedComponent),
-      },
       {
         path: 'my-jobs',
         loadComponent: () => import('./features/janitor/my-jobs/my-jobs.component').then((m) => m.MyJobsComponent),
@@ -65,7 +57,15 @@ export const routes: Routes = [
         path: ':id',
         loadComponent: () => import('./features/janitor/job-detail/job-detail.component').then((m) => m.JobDetailComponent),
       },
+      {
+        path: '',
+        loadComponent: () => import('./features/janitor/janitor-feed/janitor-feed.component').then((m) => m.JanitorFeedComponent),
+      },
     ],
+  },
+  {
+    path: 'auth/login',
+    loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: '',
@@ -74,6 +74,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'auth/login',
+    loadComponent: () => import('./features/not-found/not-found.component').then( (m) => m.NotFoundComponent),
   },
 ];
