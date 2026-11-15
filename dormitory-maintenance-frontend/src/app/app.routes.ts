@@ -5,7 +5,7 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: 'admin',
-    title: 'Administrador',
+    title: 'Administrator',
     canActivate: [authGuard, roleGuard(['administrator'])],
     loadComponent: () => import('./features/admin/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     children: [
