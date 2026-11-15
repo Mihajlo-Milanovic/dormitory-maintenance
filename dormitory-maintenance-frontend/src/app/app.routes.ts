@@ -5,6 +5,7 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: 'admin',
+    title: 'Administrador',
     canActivate: [authGuard, roleGuard(['administrator'])],
     loadComponent: () => import('./features/admin/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     children: [
@@ -29,6 +30,7 @@ export const routes: Routes = [
   },
   {
     path: 'student',
+    title: 'Student',
     canActivate: [authGuard, roleGuard(['student'])],
     children: [
       {
@@ -47,6 +49,7 @@ export const routes: Routes = [
   },
   {
     path: 'janitor',
+    title: 'Janitor',
     canActivate: [authGuard, roleGuard(['janitor'])],
     children: [
       {
@@ -65,6 +68,7 @@ export const routes: Routes = [
   },
   {
     path: 'auth/login',
+    title: 'Login',
     loadComponent: () => import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
   {
