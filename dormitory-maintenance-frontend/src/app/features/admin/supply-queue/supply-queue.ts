@@ -9,10 +9,10 @@ import { SupplyRequest, SupplyStatus } from '../../../shared/models/supply.model
   selector: 'app-supply-queue',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './supply-queue.component.html',
-  styleUrl: './supply-queue.component.css',
+  templateUrl: './supply-queue.html',
+  styleUrl: './supply-queue.css',
 })
-export class SupplyQueueComponent implements OnInit {
+export class SupplyQueue implements OnInit {
   private readonly adminService = inject(AdminService);
 
   protected supplyRequests: SupplyRequest[] = [];
@@ -59,7 +59,9 @@ export class SupplyQueueComponent implements OnInit {
     if (this.selectedStatusFilter === 'all') {
       this.filteredRequests = this.supplyRequests;
     } else {
-      this.filteredRequests = this.supplyRequests.filter((r) => r.status.toLowerCase() === this.selectedStatusFilter.toLowerCase());
+      this.filteredRequests = this.supplyRequests.filter(
+        (r) => r.status.toLowerCase() === this.selectedStatusFilter.toLowerCase(),
+      );
     }
   }
 

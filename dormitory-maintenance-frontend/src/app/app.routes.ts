@@ -21,9 +21,7 @@ export const routes: Routes = [
       {
         path: 'supplies',
         loadComponent: () =>
-          import('./features/admin/supply-queue/supply-queue.component').then(
-            (m) => m.SupplyQueueComponent,
-          ),
+          import('./features/admin/supply-queue/supply-queue').then((m) => m.SupplyQueue),
       },
       {
         path: 'reassignment',
