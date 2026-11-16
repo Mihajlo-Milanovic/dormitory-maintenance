@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map, take } from 'rxjs';
 import { selectUserRole } from '../../features/auth/state/auth.selectors';
-import { UserRole } from '../../shared/models/user.model';
+import { UserRole } from '../../shared/models/user-role.model';
 
 export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
   return (route, state) => {

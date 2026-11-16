@@ -1,6 +1,6 @@
-export type UserRole = 'student' | 'janitor' | 'administrator';
+import {UserRole} from './user-role.model';
+import {JanitorSpecialization} from './janitor-specialication.model';
 
-export type JanitorSpecialization = 'plumbing' | 'electrical' | 'furniture' | 'heating' | 'other';
 
 export interface User {
   id: string;
