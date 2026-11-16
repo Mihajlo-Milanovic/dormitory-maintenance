@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "db": "docker run -d \\\n  --name dorm_postgres \\\n  -p 5432:5432 \\\n  -e POSTGRES_USER=postgres \\\n  -e POSTGRES_PASSWORD=postgres \\\n  -e POSTGRES_DB=dormitory_maintenance \\\n  -v postgres_data:/var/lib/postgresql/data \\\n  --health-cmd=\"pg_isready -U postgres -d dormitory_maintenance\" \\\n  --health-interval=5s \\\n  --health-timeout=5s \\\n  --health-retries=5 \\\n  --restart unless-stopped \\\n  postgres:16-alpine"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

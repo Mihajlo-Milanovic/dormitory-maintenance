@@ -9,7 +9,7 @@ generator client {
 enum Role {
   student
   janitor
-  administrator
+  admin
 }
 
 enum Category {

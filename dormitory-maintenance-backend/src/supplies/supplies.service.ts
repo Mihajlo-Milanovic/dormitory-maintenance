@@ -24,7 +24,7 @@ export class SuppliesService {
       });
     }
 
-    if (user.role === Role.administrator) {
+    if (user.role === Role.admin) {
       return this.prisma.supplyRequest.findMany({
         include: {
           janitor: { select: { id: true, name: true, email: true } },
@@ -67,8 +67,16 @@ export class SuppliesService {
       return u;
     });
 
-    void this.notifications.createAndSend(updated.janitorId, 'supply.updated', updated);
-    void this.notifications.broadcastToRole('administrator', 'supply.updated', updated);
+    void this.notifications.createAndSend(
+      updated.janitorId,
+      'supply.updated',
+      updated,
+    );
+    void this.notifications.broadcastToRole(
+      'administrator',
+      'supply.updated',
+      updated,
+    );
 
     return updated;
   }

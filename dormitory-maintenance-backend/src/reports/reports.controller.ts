@@ -65,7 +65,7 @@ export class ReportsController {
   }
 
   @Post(':id/reassign')
-  @Roles(Role.administrator)
+  @Roles(Role.admin)
   @HttpCode(HttpStatus.OK)
   reassign(
     @CurrentUser() user: any,

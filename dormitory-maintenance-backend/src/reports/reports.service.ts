@@ -52,9 +52,20 @@ export class ReportsService {
       return newReport;
     });
 
-    const fullReport = await this.findOne({ id: studentId, role: Role.student }, report.id);
-    void this.notifications.broadcastToCategory(dto.category, 'report.created', fullReport);
-    void this.notifications.broadcastToRole('administrator', 'report.created', fullReport);
+    const fullReport = await this.findOne(
+      { id: studentId, role: Role.student },
+      report.id,
+    );
+    void this.notifications.broadcastToCategory(
+      dto.category,
+      'report.created',
+      fullReport,
+    );
+    void this.notifications.broadcastToRole(
+      'administrator',
+      'report.created',
+      fullReport,
+    );
 
     return fullReport;
   }
@@ -87,7 +98,11 @@ export class ReportsService {
     }
 
     return this.prisma.report.findMany({
-      include: { attachments: true, jobs: { include: { janitor: true } }, student: true },
+      include: {
+        attachments: true,
+        jobs: { include: { janitor: true } },
+        student: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -96,10 +111,20 @@ export class ReportsService {
     const report = await this.prisma.report.findUnique({
       where: { id },
       include: {
-        student: { select: { id: true, name: true, email: true, roomNumber: true } },
+        student: {
+          select: { id: true, name: true, email: true, roomNumber: true },
+        },
         attachments: true,
-        jobs: { include: { janitor: { select: { id: true, name: true, email: true } }, supplyRequests: true } },
-        events: { include: { actor: { select: { id: true, name: true, role: true } } }, orderBy: { at: 'asc' } },
+        jobs: {
+          include: {
+            janitor: { select: { id: true, name: true, email: true } },
+            supplyRequests: true,
+          },
+        },
+        events: {
+          include: { actor: { select: { id: true, name: true, role: true } } },
+          orderBy: { at: 'asc' },
+        },
       },
     });
 
@@ -114,12 +139,18 @@ export class ReportsService {
     return report;
   }
 
-  async update(user: { id: string; role: Role }, id: string, dto: UpdateReportDto) {
+  async update(
+    user: { id: string; role: Role },
+    id: string,
+    dto: UpdateReportDto,
+  ) {
     const report = await this.findOne(user, id);
 
     if (user.role === Role.student) {
       if (report.status !== ReportStatus.Waiting) {
-        throw new BadRequestException('Cannot edit report after it has been accepted or processed');
+        throw new BadRequestException(
+          'Cannot edit report after it has been accepted or processed',
+        );
       }
       const updated = await this.prisma.report.update({
         where: { id },
@@ -131,11 +162,15 @@ export class ReportsService {
         },
         include: { attachments: true },
       });
-      void this.notifications.broadcastToRole('administrator', 'report.updated', updated);
+      void this.notifications.broadcastToRole(
+        'administrator',
+        'report.updated',
+        updated,
+      );
       return updated;
     }
 
-    if (user.role === Role.administrator) {
+    if (user.role === Role.admin) {
       const updated = await this.prisma.$transaction(async (tx) => {
         const updateData: any = {};
         let eventData: any = null;
@@ -177,8 +212,16 @@ export class ReportsService {
         return up;
       });
 
-      void this.notifications.createAndSend(report.studentId, 'report.updated', updated);
-      void this.notifications.broadcastToRole('administrator', 'report.updated', updated);
+      void this.notifications.createAndSend(
+        report.studentId,
+        'report.updated',
+        updated,
+      );
+      void this.notifications.broadcastToRole(
+        'administrator',
+        'report.updated',
+        updated,
+      );
       return updated;
     }
 
@@ -186,7 +229,10 @@ export class ReportsService {
   }
 
   async cancel(studentId: string, id: string) {
-    const report = await this.findOne({ id: studentId, role: Role.student }, id);
+    const report = await this.findOne(
+      { id: studentId, role: Role.student },
+      id,
+    );
     if (report.status !== ReportStatus.Waiting) {
       throw new BadRequestException('Can only cancel reports that are waiting');
     }
@@ -211,7 +257,11 @@ export class ReportsService {
       return up;
     });
 
-    void this.notifications.broadcastToRole('administrator', 'report.updated', updated);
+    void this.notifications.broadcastToRole(
+      'administrator',
+      'report.updated',
+      updated,
+    );
     return updated;
   }
 
@@ -275,17 +325,33 @@ export class ReportsService {
           actorId: adminId,
           action: 'REASSIGN_REPORT',
           targetUserId: dto.newJanitorId,
-          newValue: JSON.stringify({ reportId, newStatus, newJanitorId: dto.newJanitorId }),
+          newValue: JSON.stringify({
+            reportId,
+            newStatus,
+            newJanitorId: dto.newJanitorId,
+          }),
         },
       });
 
       return up;
     });
 
-    void this.notifications.createAndSend(report.studentId, 'report.updated', updated);
-    void this.notifications.broadcastToRole('administrator', 'job.reassigned', updated);
+    void this.notifications.createAndSend(
+      report.studentId,
+      'report.updated',
+      updated,
+    );
+    void this.notifications.broadcastToRole(
+      'administrator',
+      'job.reassigned',
+      updated,
+    );
     if (dto.newJanitorId) {
-      void this.notifications.createAndSend(dto.newJanitorId, 'job.reassigned', updated);
+      void this.notifications.createAndSend(
+        dto.newJanitorId,
+        'job.reassigned',
+        updated,
+      );
     }
 
     return updated;
@@ -297,7 +363,9 @@ export class ReportsService {
     });
 
     if (activeJob) {
-      throw new ConflictException('Janitor already has an active job. Complete or pause current job first.');
+      throw new ConflictException(
+        'Janitor already has an active job. Complete or pause current job first.',
+      );
     }
 
     const job = await this.prisma.$transaction(async (tx) => {
@@ -306,7 +374,9 @@ export class ReportsService {
         throw new NotFoundException(`Report with ID ${reportId} not found`);
       }
       if (report.status !== ReportStatus.Waiting) {
-        throw new BadRequestException('Report is no longer waiting for acceptance');
+        throw new BadRequestException(
+          'Report is no longer waiting for acceptance',
+        );
       }
 
       const j = await tx.job.create({
@@ -336,7 +406,11 @@ export class ReportsService {
       return j;
     });
 
-    void this.notifications.broadcastToRole('administrator', 'report.updated', job);
+    void this.notifications.broadcastToRole(
+      'administrator',
+      'report.updated',
+      job,
+    );
     return job;
   }
 }

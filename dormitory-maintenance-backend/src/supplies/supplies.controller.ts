@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { SuppliesService } from './supplies.service.js';
 import { UpdateSupplyRequestDto } from './dto/update-supply-request.dto.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -20,13 +13,13 @@ export class SuppliesController {
   constructor(private readonly suppliesService: SuppliesService) {}
 
   @Get()
-  @Roles(Role.janitor, Role.administrator)
+  @Roles(Role.janitor, Role.admin)
   findAll(@CurrentUser() user: any) {
     return this.suppliesService.findAll(user);
   }
 
   @Patch(':id')
-  @Roles(Role.administrator)
+  @Roles(Role.admin)
   update(
     @CurrentUser() user: any,
     @Param('id') id: string,

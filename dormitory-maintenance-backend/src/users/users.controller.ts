@@ -21,7 +21,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { Role } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.administrator)
+@Roles(Role.admin)
 @Controller('api/v1/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
