@@ -24,6 +24,8 @@ services:
       context: ./dormitory-maintenance-backend
       dockerfile: Dockerfile
     container_name: dormitory_backend
+    ports:
+      - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/dormitory_maintenance?schema=public
       - JWT_SECRET=super-secret-jwt-key-dormitory-maintenance
