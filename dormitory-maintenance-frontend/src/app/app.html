@@ -5,18 +5,7 @@
         <div class="flex justify-between h-16">
           <div class="flex items-center space-x-8">
             <div class="shrink-0 flex items-center">
-              <span class="text-xl font-bold text-indigo-600">DormMaintenance</span>
-            </div>
-            <div class="hidden md:flex space-x-4">
-              @if ((userRole$ | async) === 'student') {
-                <a routerLink="/student" routerLinkActive="bg-indigo-50 text-indigo-700" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">My Reports</a>
-              }
-              @if ((userRole$ | async) === 'janitor') {
-                <a routerLink="/janitor" routerLinkActive="bg-indigo-50 text-indigo-700" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Job Feed</a>
-              }
-              @if ((userRole$ | async) === 'administrator') {
-                <a routerLink="/admin" routerLinkActive="bg-indigo-50 text-indigo-700" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Admin Dashboard</a>
-              }
+              <span class="text-xl font-bold text-indigo-600" routerLink="/">DormMaintenance</span>
             </div>
           </div>
           <div class="flex items-center space-x-4">
@@ -29,25 +18,31 @@
               >
                 🔔
                 @if (unreadCount > 0) {
-                  <span class="absolute top-1 right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                  <span
+                    class="absolute top-1 right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
                     {{ unreadCount }}
                   </span>
                 }
               </button>
 
               @if (showNotificationsDropdown) {
-                <div class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div
+                  class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                   <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
                     <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
                     @if (unreadCount > 0) {
-                      <button (click)="markAllAsRead()" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Mark all as read</button>
+                      <button (click)="markAllAsRead()"
+                              class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                        Mark all as read
+                      </button>
                     }
                   </div>
 
                   <div class="max-h-80 overflow-y-auto divide-y divide-gray-100">
                     @if (notifications.length > 0) {
                       @for (notif of notifications; track notif.id) {
-                        <div [class]="notif.isRead ? 'bg-white' : 'bg-indigo-50/50'" class="p-4 hover:bg-gray-50 transition-colors">
+                        <div [class]="notif.isRead ? 'bg-white' : 'bg-indigo-50/50'"
+                             class="p-4 hover:bg-gray-50 transition-colors">
                           <div class="flex items-start justify-between">
                             <div class="space-y-1 pr-2">
                               <p class="text-xs font-semibold text-gray-900">{{ notif.title }}</p>
@@ -55,7 +50,9 @@
                               <p class="text-[10px] text-gray-400">{{ notif.createdAt | date:'short' }}</p>
                             </div>
                             @if (!notif.isRead) {
-                              <button (click)="markAsRead(notif.id)" class="text-[10px] text-indigo-600 hover:underline shrink-0 font-medium">Mark read</button>
+                              <button (click)="markAsRead(notif.id)"
+                                      class="text-[10px] text-indigo-600 hover:underline shrink-0 font-medium">Mark read
+                              </button>
                             }
                           </div>
                         </div>
