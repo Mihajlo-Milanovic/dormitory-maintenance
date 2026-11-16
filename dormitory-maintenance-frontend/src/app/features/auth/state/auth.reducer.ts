@@ -31,5 +31,5 @@ export const authReducer = createReducer(
   })),
   on(AuthActions.loadCurrentUserFailure, () => ({
     ...initialAuthState,
-  }))
+  })),
 );

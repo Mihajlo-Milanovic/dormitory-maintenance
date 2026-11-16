@@ -1,4 +1,10 @@
-import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpHandlerFn,
+  HttpResponse,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { catchError, delay } from 'rxjs/operators';
 import { Report } from '../../shared/models/report.model';
@@ -18,7 +24,13 @@ let mockReports: Report[] = [
     studentId: 'stu-1',
     studentName: 'Alice Student',
     events: [
-      { id: 'ev-1', status: 'Waiting', createdAt: new Date().toISOString(), authorName: 'Alice Student', comment: 'Report created' }
+      {
+        id: 'ev-1',
+        status: 'Waiting',
+        createdAt: new Date().toISOString(),
+        authorName: 'Alice Student',
+        comment: 'Report created',
+      },
     ],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -37,8 +49,18 @@ let mockReports: Report[] = [
     janitorName: 'John Janitor',
     timeEstimateMinutes: 45,
     events: [
-      { id: 'ev-2', status: 'Waiting', createdAt: new Date().toISOString(), authorName: 'Bob Student' },
-      { id: 'ev-3', status: 'Accepted', createdAt: new Date().toISOString(), authorName: 'John Janitor' }
+      {
+        id: 'ev-2',
+        status: 'Waiting',
+        createdAt: new Date().toISOString(),
+        authorName: 'Bob Student',
+      },
+      {
+        id: 'ev-3',
+        status: 'Accepted',
+        createdAt: new Date().toISOString(),
+        authorName: 'John Janitor',
+      },
     ],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -57,11 +79,17 @@ let mockReports: Report[] = [
     janitorName: 'John Janitor',
     timeEstimateMinutes: 60,
     events: [
-      { id: 'ev-4', status: 'Waiting for supplies', createdAt: new Date().toISOString(), authorName: 'John Janitor', comment: 'Waiting for replacement valve' }
+      {
+        id: 'ev-4',
+        status: 'Waiting for supplies',
+        createdAt: new Date().toISOString(),
+        authorName: 'John Janitor',
+        comment: 'Waiting for replacement valve',
+      },
     ],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  }
+  },
 ];
 
 let mockSupplies: SupplyRequest[] = [
@@ -76,13 +104,35 @@ let mockSupplies: SupplyRequest[] = [
     status: 'Ordered',
     arrivalAt: 'Tomorrow 10:00 AM',
     createdAt: new Date().toISOString(),
-  }
+  },
 ];
 
 let mockUsers: User[] = [
-  { id: 'stu-1', email: 'student@dorm.edu', name: 'Alice Student', role: 'student', isActive: true, createdAt: new Date().toISOString() },
-  { id: 'jan-1', email: 'janitor@dorm.edu', name: 'John Janitor', role: 'janitor', specialization: 'plumbing', isActive: true, createdAt: new Date().toISOString() },
-  { id: 'adm-1', email: 'admin@dorm.edu', name: 'Admin User', role: 'administrator', isActive: true, createdAt: new Date().toISOString() },
+  {
+    id: 'stu-1',
+    email: 'student@dorm.edu',
+    name: 'Alice Student',
+    role: 'student',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'jan-1',
+    email: 'janitor@dorm.edu',
+    name: 'John Janitor',
+    role: 'janitor',
+    specialization: 'plumbing',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'adm-1',
+    email: 'admin@dorm.edu',
+    name: 'Admin User',
+    role: 'admin',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  },
 ];
 
 let mockNotifications: AppNotification[] = [
@@ -94,10 +144,13 @@ let mockNotifications: AppNotification[] = [
     type: 'report.created',
     isRead: false,
     createdAt: new Date().toISOString(),
-  }
+  },
 ];
 
-export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+export const mockInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       const url = req.url;
@@ -106,26 +159,28 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       if (url.includes('auth/login') && method === 'POST') {
         const body = req.body as any;
         const email = body?.email || 'student@dorm.edu';
-        let matchedUser = mockUsers.find(u => u.email === email);
+        let matchedUser = mockUsers.find((u) => u.email === email);
         if (!matchedUser) {
           matchedUser = mockUsers[0];
         }
-        return of(new HttpResponse({
-          status: 200,
-          body: {
-            accessToken: 'mock-jwt-token-xyz',
-            refreshToken: 'mock-refresh-token-xyz',
-            user: matchedUser,
-          }
-        })).pipe(delay(300));
+        return of(
+          new HttpResponse({
+            status: 200,
+            body: {
+              accessToken: 'mock-jwt-token-xyz',
+              refreshToken: 'mock-refresh-token-xyz',
+              user: matchedUser,
+            },
+          }),
+        ).pipe(delay(300));
       }
 
       if (url.includes('reports/open') && method === 'GET') {
-        const openReports = mockReports.filter(r => r.status === 'Waiting');
+        const openReports = mockReports.filter((r) => r.status === 'Waiting');
         return of(new HttpResponse({ status: 200, body: openReports })).pipe(delay(200));
       }
       if (url.includes('reports/janitor') && method === 'GET') {
-        const janitorJobs = mockReports.filter(r => r.janitorId === 'jan-1');
+        const janitorJobs = mockReports.filter((r) => r.janitorId === 'jan-1');
         return of(new HttpResponse({ status: 200, body: janitorJobs })).pipe(delay(200));
       }
       if (url.includes('reports') && method === 'GET') {
@@ -144,7 +199,15 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
           status: 'Waiting',
           studentId: 'stu-1',
           studentName: 'Alice Student',
-          events: [{ id: 'ev-' + Date.now(), status: 'Waiting', createdAt: new Date().toISOString(), authorName: 'Alice Student', comment: 'Report submitted' }],
+          events: [
+            {
+              id: 'ev-' + Date.now(),
+              status: 'Waiting',
+              createdAt: new Date().toISOString(),
+              authorName: 'Alice Student',
+              comment: 'Report submitted',
+            },
+          ],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -155,12 +218,17 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       if (url.includes('/accept') && method === 'POST') {
         const parts = url.split('/');
         const id = parts[parts.length - 2];
-        const report = mockReports.find(r => r.id === id);
+        const report = mockReports.find((r) => r.id === id);
         if (report) {
           report.status = 'Accepted';
           report.janitorId = 'jan-1';
           report.janitorName = 'John Janitor';
-          report.events.push({ id: 'ev-' + Date.now(), status: 'Accepted', createdAt: new Date().toISOString(), authorName: 'John Janitor' });
+          report.events.push({
+            id: 'ev-' + Date.now(),
+            status: 'Accepted',
+            createdAt: new Date().toISOString(),
+            authorName: 'John Janitor',
+          });
         }
         return of(new HttpResponse({ status: 200, body: report })).pipe(delay(200));
       }
@@ -169,7 +237,7 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
         const parts = url.split('/');
         const id = parts[parts.length - 2];
         const body = req.body as any;
-        const report = mockReports.find(r => r.id === id);
+        const report = mockReports.find((r) => r.id === id);
         if (report) {
           report.timeEstimateMinutes = body.minutes;
         }
@@ -180,10 +248,16 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
         const parts = url.split('/');
         const id = parts[parts.length - 2];
         const body = req.body as any;
-        const report = mockReports.find(r => r.id === id);
+        const report = mockReports.find((r) => r.id === id);
         if (report) {
           report.status = body.status;
-          report.events.push({ id: 'ev-' + Date.now(), status: body.status, createdAt: new Date().toISOString(), authorName: 'John Janitor', comment: body.comment });
+          report.events.push({
+            id: 'ev-' + Date.now(),
+            status: body.status,
+            createdAt: new Date().toISOString(),
+            authorName: 'John Janitor',
+            comment: body.comment,
+          });
         }
         return of(new HttpResponse({ status: 200, body: report })).pipe(delay(200));
       }
@@ -191,10 +265,16 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       if (url.includes('/resume') && method === 'POST') {
         const parts = url.split('/');
         const id = parts[parts.length - 2];
-        const report = mockReports.find(r => r.id === id);
+        const report = mockReports.find((r) => r.id === id);
         if (report) {
           report.status = 'Repair in progress';
-          report.events.push({ id: 'ev-' + Date.now(), status: 'Repair in progress', createdAt: new Date().toISOString(), authorName: 'John Janitor', comment: 'Resumed after supplies delivery' });
+          report.events.push({
+            id: 'ev-' + Date.now(),
+            status: 'Repair in progress',
+            createdAt: new Date().toISOString(),
+            authorName: 'John Janitor',
+            comment: 'Resumed after supplies delivery',
+          });
         }
         return of(new HttpResponse({ status: 200, body: report })).pipe(delay(200));
       }
@@ -216,7 +296,7 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
           createdAt: new Date().toISOString(),
         };
         mockSupplies.unshift(newReq);
-        const report = mockReports.find(r => r.id === body.reportId);
+        const report = mockReports.find((r) => r.id === body.reportId);
         if (report) {
           report.status = 'Waiting for supplies';
         }
@@ -226,7 +306,7 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
         const parts = url.split('/');
         const id = parts[parts.length - 1];
         const body = req.body as any;
-        const sup = mockSupplies.find(s => s.id === id);
+        const sup = mockSupplies.find((s) => s.id === id);
         if (sup) {
           sup.status = body.status;
           if (body.arrivalAt !== undefined) sup.arrivalAt = body.arrivalAt;
@@ -258,12 +338,12 @@ export const mockInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       if (url.includes('notifications/') && method === 'PATCH') {
         const parts = url.split('/');
         const id = parts[parts.length - 2];
-        const notif = mockNotifications.find(n => n.id === id);
+        const notif = mockNotifications.find((n) => n.id === id);
         if (notif) notif.isRead = true;
         return of(new HttpResponse({ status: 200, body: notif })).pipe(delay(100));
       }
 
       return throwError(() => error);
-    })
+    }),
   );
 };

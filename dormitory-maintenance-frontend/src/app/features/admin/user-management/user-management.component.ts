@@ -2,7 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../services/admin.service';
-import { User, UserRole, JanitorSpecialization } from '../../../shared/models/user.model';
+import { User } from '../../../shared/models/user.model';
+import { UserRole } from '../../../shared/models/user-role.model';
+import { JanitorSpecialization } from '../../../shared/models/janitor-specialication.model';
 
 @Component({
   selector: 'app-user-management',
