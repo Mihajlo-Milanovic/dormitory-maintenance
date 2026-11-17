@@ -13,27 +13,12 @@ import { WebSocketService } from './core/services/websocket.service';
 import { mergeNotifications } from './shared/models/notification.mapper';
 import { AppNotification } from './shared/models/notification.model';
 import { combineLatest, distinctUntilChanged, map, Subscription } from 'rxjs';
-import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatCardModule } from '@angular/material/card';
+import { MatRegistries, MatModules } from './shared/ui/material-modules';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    RouterLink,
-    MatIconModule,
-    MatButtonModule,
-    MatDividerModule,
-    MatToolbarModule,
-    MatBadgeModule,
-    MatCardModule,
-  ],
+  imports: [CommonModule, RouterOutlet, RouterLink, ...MatModules],
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
@@ -41,7 +26,7 @@ export class App implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly notificationService = inject(NotificationService);
   private readonly webSocketService = inject(WebSocketService);
-  private iconRegistry = inject(MatIconRegistry);
+  private iconRegistry = inject(MatRegistries.MatIconRegistry);
   private authSub?: Subscription;
   private sessionSub = new Subscription();
   private refreshSub?: Subscription;

@@ -2,12 +2,11 @@
   @if (isAuthenticated$ | async) {
     <nav class="main-content">
       <mat-toolbar class="navbar-container">
-        <span class="navbar-brand-link" routerLink="/">Dorm Maintenance</span>
+        <a class="navbar-brand-link" routerLink="/">Dorm Maintenance</a>
         <div class="navbar-actions">
           <!-- Notification Bell & Dropdown -->
-          <button
+          <button matIconButton="elevated"
             (click)="toggleNotificationsDropdown()"
-            matIconButton
             aria-label="Notifications"
           >
             @if (unreadCount) {
@@ -56,15 +55,13 @@
             <div class="user-info">
               <div class="user-name">{{ user.name }}</div>
               <mat-card class="user-role-card">
-<!--                <mat-card-content>-->
                   <span class="user-role">{{ user.role }}</span>
-<!--                </mat-card-content>-->
               </mat-card>
             </div>
           }
-          <button
+          <button matButton="outlined"
+            class="logout-btn"
             (click)="onLogout()"
-            matButton
           >
             Sign out
           </button>

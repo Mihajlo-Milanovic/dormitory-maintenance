@@ -23,6 +23,7 @@
   align-items: center;
   justify-content: space-between;
   box-shadow: var(--mat-sys-level3);
+  color: var(--mat-sys-on-surface);
   background-color: var(--mat-sys-primary-container);
 }
 
@@ -52,12 +53,7 @@
 .navbar-actions {
   display: flex;
   align-items: center;
-  padding: 2rem;
   gap: 1rem;
-}
-
-.navbar-spacer{
-  flex: 1 1 auto;
 }
 
 .vertical-divider {
@@ -231,11 +227,10 @@
 // -----------------------------------------------------------------------
 .user-info {
   display: none;
-  text-align: right;
 
   @media (min-width: 640px) {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 }
 
@@ -247,36 +242,17 @@
 .user-role-card {
   color: var(--mat-sys-on-tertiary-container-variant);
   background-color: var(--mat-sys-tertiary-container);
-  box-shadow: var(--mat-sys-level2);
+  box-shadow: var(--mat-sys-level3);
 }
 
 .user-role {
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 1rem;
+  padding-right: 1rem;
   font-size: var(--mat-sys-title-small-size);
   text-transform: uppercase;
 }
 
 .logout-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px var(--mat-sys-spacing-3);
-  border: 1px solid var(--mat-sys-outline);
-  border-radius: var(--mat-sys-corner-medium);
-  background-color: var(--mat-sys-surface);
-  font-size: var(--mat-sys-typescale-label-medium-size);
-  font-weight: 500;
-  color: var(--mat-sys-color-on-surface-variant);
-  cursor: pointer;
-  transition: background-color var(--mat-sys-motion-duration-short) var(--mat-sys-motion-easing-standard);
-
-  &:hover {
-    color: var(--mat-sys-tertiary);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--mat-sys-surface);
-    outline-offset: 2px;
-  }
+  text-transform: capitalize;
 }
 
