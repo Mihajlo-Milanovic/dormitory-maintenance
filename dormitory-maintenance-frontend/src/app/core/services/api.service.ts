@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api'; // Backend REST base URL (proxy or env)
+  private readonly baseUrl = environment.apiUrl; // Backend REST base URL (proxy or env)
 
   get<T>(endpoint: string, params?: Record<string, any>): Observable<T> {
     let httpParams = new HttpParams();

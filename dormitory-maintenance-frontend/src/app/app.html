@@ -1,91 +1,79 @@
-<div class="min-h-screen bg-gray-50 flex flex-col relative">
+<div class="app-shell">
   @if (isAuthenticated$ | async) {
-    <nav class="bg-white border-b border-gray-200 shadow-xs relative z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center space-x-8">
-            <div class="shrink-0 flex items-center">
-              <span class="text-xl font-bold text-indigo-600" routerLink="/">DormMaintenance</span>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <!-- Notification Bell & Dropdown -->
-            <div class="relative">
-              <button
-                (click)="toggleNotificationsDropdown()"
-                class="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none rounded-full hover:bg-gray-100 transition-colors"
-                title="Notifications"
-              >
-                🔔
-                @if (unreadCount > 0) {
-                  <span
-                    class="absolute top-1 right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                    {{ unreadCount }}
-                  </span>
-                }
-              </button>
-
-              @if (showNotificationsDropdown) {
-                <div
-                  class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-                    <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
-                    @if (unreadCount > 0) {
-                      <button (click)="markAllAsRead()"
-                              class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
-                        Mark all as read
-                      </button>
-                    }
-                  </div>
-
-                  <div class="max-h-80 overflow-y-auto divide-y divide-gray-100">
-                    @if (notifications.length > 0) {
-                      @for (notif of notifications; track notif.id) {
-                        <div [class]="notif.isRead ? 'bg-white' : 'bg-indigo-50/50'"
-                             class="p-4 hover:bg-gray-50 transition-colors">
-                          <div class="flex items-start justify-between">
-                            <div class="space-y-1 pr-2">
-                              <p class="text-xs font-semibold text-gray-900">{{ notif.title }}</p>
-                              <p class="text-xs text-gray-600">{{ notif.message }}</p>
-                              <p class="text-[10px] text-gray-400">{{ notif.createdAt | date:'short' }}</p>
-                            </div>
-                            @if (!notif.isRead) {
-                              <button (click)="markAsRead(notif.id)"
-                                      class="text-[10px] text-indigo-600 hover:underline shrink-0 font-medium">Mark read
-                              </button>
-                            }
-                          </div>
-                        </div>
-                      }
-                    } @else {
-                      <div class="text-center py-8 text-xs text-gray-500">
-                        No notifications yet.
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-
-            @if (currentUser$ | async; as user) {
-              <div class="text-right hidden sm:block">
-                <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
-                <div class="text-xs text-gray-500 capitalize">{{ user.role }}</div>
-              </div>
+    <nav class="main-content">
+      <mat-toolbar class="navbar-container">
+        <span class="navbar-brand-link" routerLink="/">Dorm Maintenance</span>
+        <div class="navbar-actions">
+          <!-- Notification Bell & Dropdown -->
+          <button
+            (click)="toggleNotificationsDropdown()"
+            matIconButton
+            aria-label="Notifications"
+          >
+            @if (unreadCount) {
+              <mat-icon matBadge="{{unreadCount}}">NOTIFICATIONS</mat-icon>
+            } @else {
+              <mat-icon>NOTIFICATIONS</mat-icon>
             }
-            <button
-              (click)="onLogout()"
-              class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
+          </button>
+
+<!--          @if (showNotificationsDropdown) {-->
+<!--            <div class="notifications-dropdown">-->
+<!--              <div class="notifications-header">-->
+<!--                <h3 class="notifications-title">Notifications</h3>-->
+<!--                @if (unreadCount > 0) {-->
+<!--                  <button (click)="markAllAsRead()" class="mark-all-btn">-->
+<!--                    Mark all as read-->
+<!--                  </button>-->
+<!--                }-->
+<!--              </div>-->
+
+<!--              <div class="notifications-list">-->
+<!--                @if (notifications.length > 0) {-->
+<!--                  @for (notif of notifications; track notif.id) {-->
+<!--                    <div [class.notification-item&#45;&#45;unread]="!notif.isRead" class="notification-item">-->
+<!--                      <div class="notification-row">-->
+<!--                        <div class="notification-content">-->
+<!--                          <p class="notification-title">{{ notif.title }}</p>-->
+<!--                          <p class="notification-message">{{ notif.message }}</p>-->
+<!--                          <p class="notification-time">{{ notif.createdAt | date:'short' }}</p>-->
+<!--                        </div>-->
+<!--                        @if (!notif.isRead) {-->
+<!--                          <button (click)="markAsRead(notif.id)" class="mark-read-btn">Mark read</button>-->
+<!--                        }-->
+<!--                      </div>-->
+<!--                    </div>-->
+<!--                  }-->
+<!--                } @else {-->
+<!--                  <div class="notifications-empty">-->
+<!--                    No notifications yet.-->
+<!--                  </div>-->
+<!--                }-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          }-->
+          @if (currentUser$ | async; as user) {
+            <div class="user-info">
+              <div class="user-name">{{ user.name }}</div>
+              <mat-card class="user-role-card">
+<!--                <mat-card-content>-->
+                  <span class="user-role">{{ user.role }}</span>
+<!--                </mat-card-content>-->
+              </mat-card>
+            </div>
+          }
+          <button
+            (click)="onLogout()"
+            matButton
+          >
+            Sign out
+          </button>
         </div>
-      </div>
+      </mat-toolbar>
     </nav>
   }
 
-  <main class="flex-1">
+  <main class="main-content">
     <router-outlet></router-outlet>
   </main>
 </div>

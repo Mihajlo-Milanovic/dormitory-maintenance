@@ -1,0 +1,9 @@
+
+@use "tailwindcss";
+
+// Fix Tailwind border conflict on Material outlined inputs
+@layer base {
+  .mdc-notched-outline__notch {
+    border-right: none;
+  }
+}
