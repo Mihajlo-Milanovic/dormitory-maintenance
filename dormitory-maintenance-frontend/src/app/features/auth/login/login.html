@@ -1,0 +1,78 @@
+<div class="login-screen">
+  <mat-card class="login-card" >
+    <mat-card-header class="login-card-header">
+      <h2 class="login-card-brand-name">
+        Dormitory Maintenance
+      </h2>
+      <p class="login-card-regards">
+        Sign in to your account
+      </p>
+    </mat-card-header>
+
+    <form
+      class="login-form"
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()"
+    >
+      <mat-card-content class="login-card-content">
+        <mat-form-field appearance="outline"
+                        class="input-field"
+        >
+          <mat-label class="">E-mail</mat-label>
+          <input matInput
+                 id="email-address"
+                 type="email"
+                 formControlName="email"
+                 required
+                 placeholder="student&#64;dorm.edu"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline"
+                        class="input-field"
+        >
+          <mat-label class="">Password</mat-label>
+          <input matInput
+                 [type]="hidePassword() ? 'password' : 'text'"
+                 id="password"
+                 type="password"
+                 formControlName="password"
+                 required
+                 placeholder="••••••••"
+          />
+          <button matIconButton
+                  matSuffix
+                  type="button"
+                  aria-label="Hide password"
+                  [attr.aria-pressed]="hidePassword()"
+                  (click)="passwordVisibilityToggle()"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions class="submit-button-container">
+        <button matButton="filled"
+                type="submit"
+                [disabled]="loginForm.invalid || loading()"
+                class="submit-button"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="20"
+                         aria-label="Loading">
+            </mat-spinner>
+          } @else {
+            <span>Sign in</span>
+          }
+        </button>
+      </mat-card-actions>
+    </form>
+
+    @if (error(); as errorMsg) {
+      <mat-card-footer class="login-error-message-container">
+          <p class="login-error-message">{{ errorMsg }}</p>
+      </mat-card-footer>
+    }
+  </mat-card>
+
+</div>

@@ -1,11 +1,11 @@
-<div class="app-shell">
+<!--<div class="app-shell">-->
   @if (isAuthenticated$ | async) {
-    <nav class="main-content">
+    <nav>
       <mat-toolbar class="navbar-container">
         <a class="navbar-brand-link" routerLink="/">Dorm Maintenance</a>
         <div class="navbar-actions">
           <!-- Notification Bell & Dropdown -->
-          <button matIconButton="elevated"
+          <button matIconButton
             (click)="toggleNotificationsDropdown()"
             aria-label="Notifications"
           >
@@ -70,7 +70,7 @@
     </nav>
   }
 
-  <main class="main-content">
+  <main>
     <router-outlet></router-outlet>
   </main>
-</div>
+<!--</div>-->

@@ -8,8 +8,7 @@ export const routes: Routes = [
     path: 'auth/login',
     title: 'Login',
     canActivate: [guestGuard],
-    loadComponent: () =>
-      import('./features/auth/login/login.component').then((m) => m.LoginComponent),
+    loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
   {
     path: 'admin',
