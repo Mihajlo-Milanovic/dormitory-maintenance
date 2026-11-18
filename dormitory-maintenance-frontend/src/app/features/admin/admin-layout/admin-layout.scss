@@ -1,0 +1,15 @@
+.navbar-container {
+  position: relative;
+  display: flex;
+  //flex: 1 1 auto;
+  align-items: center;
+  justify-content: start;
+  gap: 1rem;
+  //box-shadow: var(--mat-sys-level1);
+  color: var(--mat-sys-on-secondary-container);
+  background-color: var(--mat-sys-secondary-container);
+}
+
+.panel-nav-button {
+  text-transform: capitalize;
+}
