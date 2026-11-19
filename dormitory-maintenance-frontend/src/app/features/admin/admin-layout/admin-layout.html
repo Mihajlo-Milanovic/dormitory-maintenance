@@ -1,26 +1,24 @@
-<nav class="main-content">
-  <mat-toolbar class="navbar-container">
-
-    <span>Admin control panel</span>
+<nav>
+  <mat-toolbar class="admin-layout-navbar-container">
 
     <a [matButton]="rlaSupply.isActive ? 'outlined' : 'tonal'"
        routerLinkActive
        routerLink="/admin/supplies"
        #rlaSupply="routerLinkActive"
        [routerLinkActiveOptions]="{exact:true}"
-       class="panel-nav-button"
+       class="admin-layout-panel-nav-button"
     >
-      Supply Queue
+      <p>Supply Queue</p>
     </a>
 
     <a [matButton]="rlaReassign.isActive ? 'outlined' : 'tonal'"
-      routerLinkActive
+       routerLinkActive
        routerLink="/admin/reassignment"
        #rlaReassign="routerLinkActive"
        [routerLinkActiveOptions]="{exact:true}"
-      class="panel-nav-button"
+       class="admin-layout-panel-nav-button"
     >
-      Reassignment & Severity
+      <p>Reassignment & Severity</p>
     </a>
 
     <a [matButton]="rlaUsers.isActive ? 'outlined' : 'tonal'"
@@ -28,9 +26,9 @@
        routerLink="/admin/users"
        #rlaUsers="routerLinkActive"
        [routerLinkActiveOptions]="{exact:true}"
-       class="panel-nav-button"
+       class="admin-layout-panel-nav-button"
     >
-      User Management
+      <p>User Management</p>
     </a>
 
   </mat-toolbar>

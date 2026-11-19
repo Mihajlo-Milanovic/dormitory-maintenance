@@ -1,15 +1,17 @@
-.navbar-container {
+.admin-layout-navbar-container {
   position: relative;
   display: flex;
   //flex: 1 1 auto;
   align-items: center;
   justify-content: start;
   gap: 1rem;
-  //box-shadow: var(--mat-sys-level1);
-  color: var(--mat-sys-on-secondary-container);
   background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
 }
 
-.panel-nav-button {
+.admin-layout-panel-nav-button {
+  max-width: 100%;
   text-transform: capitalize;
+  box-shadow: var(--mat-sys-level3);
+  font: var(--mat-sys-title-medium);
 }

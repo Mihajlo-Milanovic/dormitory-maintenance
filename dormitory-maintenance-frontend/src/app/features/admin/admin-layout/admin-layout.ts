@@ -9,6 +9,4 @@ import { MatModules } from '../../../shared/ui/material-modules';
   styleUrl: './admin-layout.scss',
   templateUrl: './admin-layout.html',
 })
-export class AdminLayout {
-  currentPanel = input(0);
-}
+export class AdminLayout {}
