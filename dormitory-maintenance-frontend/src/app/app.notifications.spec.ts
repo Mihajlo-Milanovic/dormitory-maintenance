@@ -2,16 +2,22 @@ import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { App } from './app';
-import { selectCurrentUser, selectIsAuthenticated } from './features/auth/state/auth.selectors';
-import { NotificationService } from './core/services/notification.service';
-import { WebSocketService } from './core/services/websocket.service';
-import { AppNotification } from './shared/models/notification.model';
+import { App } from '@app/app';
+import { selectCurrentUser, selectIsAuthenticated } from '@components/auth/state/auth.selectors';
+import { NotificationService } from '@services/notification.service';
+import { WebSocketService } from '@services/websocket.service';
+import { AppNotification } from '@models/notification.model';
 
 class TestApp extends App {
-  get items() { return this.notifications; }
-  get dropdown() { return this.showNotificationsDropdown; }
-  logout() { this.onLogout(); }
+  get items() {
+    return this.notifications;
+  }
+  get dropdown() {
+    return this.showNotificationsDropdown;
+  }
+  logout() {
+    this.onLogout();
+  }
 }
 
 describe('App notification lifecycle', () => {
@@ -26,8 +32,13 @@ describe('App notification lifecycle', () => {
   let connect: ReturnType<typeof vi.fn>;
   let disconnect: ReturnType<typeof vi.fn>;
   const event: AppNotification = {
-    id: '1', userId: 'a', type: 'report.created', title: 'Report',
-    message: 'Created', isRead: false, createdAt: '2026-10-20T00:00:00Z',
+    id: '1',
+    userId: 'a',
+    type: 'report.created',
+    title: 'Report',
+    message: 'Created',
+    isRead: false,
+    createdAt: '2026-10-20T00:00:00Z',
   };
 
   beforeEach(() => {
@@ -40,19 +51,43 @@ describe('App notification lifecycle', () => {
     readAllResult = new Subject();
     connect = vi.fn();
     disconnect = vi.fn();
-    TestBed.configureTestingModule({ providers: [
-      { provide: Store, useValue: {
-        select: (selector: unknown) => selector === selectIsAuthenticated ? authenticated
-          : selector === selectCurrentUser ? user : new BehaviorSubject('student'),
-        dispatch: vi.fn(),
-      } },
-      { provide: WebSocketService, useValue: { connect, disconnect, onConnected: () => connected, onMessage: () => messages } },
-      { provide: NotificationService, useValue: { markAsRead: () => readResult, markAllAsRead: () => readAllResult, getNotifications: () => {
-        const request = new Subject<AppNotification[]>();
-        requests.push(request);
-        return request;
-      } } },
-    ] });
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: Store,
+          useValue: {
+            select: (selector: unknown) =>
+              selector === selectIsAuthenticated
+                ? authenticated
+                : selector === selectCurrentUser
+                  ? user
+                  : new BehaviorSubject('student'),
+            dispatch: vi.fn(),
+          },
+        },
+        {
+          provide: WebSocketService,
+          useValue: {
+            connect,
+            disconnect,
+            onConnected: () => connected,
+            onMessage: () => messages,
+          },
+        },
+        {
+          provide: NotificationService,
+          useValue: {
+            markAsRead: () => readResult,
+            markAllAsRead: () => readAllResult,
+            getNotifications: () => {
+              const request = new Subject<AppNotification[]>();
+              requests.push(request);
+              return request;
+            },
+          },
+        },
+      ],
+    });
     app = TestBed.runInInjectionContext(() => new TestApp());
     app.ngOnInit();
   });

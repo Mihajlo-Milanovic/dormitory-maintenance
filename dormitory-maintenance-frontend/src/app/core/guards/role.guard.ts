@@ -2,8 +2,8 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map, take } from 'rxjs';
-import { selectUserRole } from '../../features/auth/state/auth.selectors';
-import { UserRole } from '../../shared/models/user-role.model';
+import { selectUserRole } from '@store/selectors/auth.selectors';
+import { UserRole } from '@models/user-role.model';
 
 export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
   return (route, state) => {
@@ -18,7 +18,7 @@ export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
         }
         // Redirect to unauthorized or login
         return router.createUrlTree(['/auth/login']);
-      })
+      }),
     );
   };
 };

@@ -8,18 +8,18 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 // import { mockInterceptor } from './core/interceptors/mock.interceptor';
-import { authReducer } from './features/auth/state/auth.reducer';
-import { AuthEffects } from './features/auth/state/auth.effects';
-import { studentReportReducer } from './features/student/state/student-report.reducer';
-import { StudentReportEffects } from './features/student/state/student-report.effects';
-import { janitorReducer } from './features/janitor/state/janitor.reducer';
-import { JanitorEffects } from './features/janitor/state/janitor.effects';
+import { authReducer } from '@store/reducers/auth.reducer';
+import { AuthEffects } from '@store/effects/auth.effects';
+import { studentReportReducer } from '@store/reducers/student-report.reducer';
+import { StudentReportEffects } from '@store/effects/student-report.effects';
+import { janitorReducer } from '@store/reducers/janitor.reducer';
+import { JanitorEffects } from '@store/effects/janitor.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor/*, mockInterceptor*/])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor /*, mockInterceptor*/])),
     provideStore({
       auth: authReducer,
       studentReports: studentReportReducer,

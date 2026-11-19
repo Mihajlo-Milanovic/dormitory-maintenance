@@ -7,10 +7,10 @@ import {
 } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { catchError, delay } from 'rxjs/operators';
-import { Report } from '../../shared/models/report.model';
-import { SupplyRequest } from '../../shared/models/supply.model';
-import { User } from '../../shared/models/user.model';
-import { AppNotification } from '../../shared/models/notification.model';
+import { Report } from '@models/report.model';
+import { SupplyRequest } from '@models/supply.model';
+import { User } from '@models/user.model';
+import { AppNotification } from '@models/notification.model';
 
 let mockReports: Report[] = [
   {

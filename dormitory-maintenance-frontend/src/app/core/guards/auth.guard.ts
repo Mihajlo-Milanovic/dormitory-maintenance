@@ -2,8 +2,8 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map, take } from 'rxjs';
-import { selectIsAuthenticated } from '../../features/auth/state/auth.selectors';
-import { AuthService } from '../services/auth.service';
+import { selectIsAuthenticated } from '@store/selectors/auth.selectors';
+import { AuthService } from '@services/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const store = inject(Store);
@@ -22,6 +22,6 @@ export const authGuard: CanActivateFn = (route, state) => {
         return true;
       }
       return router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } });
-    })
+    }),
   );
 };

@@ -5,15 +5,15 @@ import { Store } from '@ngrx/store';
 import {
   selectIsAuthenticated,
   selectCurrentUser,
-  selectUserRole,
-} from './features/auth/state/auth.selectors';
-import { AuthActions } from './features/auth/state/auth.actions';
-import { NotificationService } from './core/services/notification.service';
-import { WebSocketService } from './core/services/websocket.service';
-import { mergeNotifications } from './shared/models/notification.mapper';
-import { AppNotification } from './shared/models/notification.model';
+  // selectUserRole,
+} from '@store/selectors/auth.selectors';
+import { AuthActions } from '@store/actions/auth.actions';
+import { NotificationService } from '@services/notification.service';
+import { WebSocketService } from '@services/websocket.service';
+import { mergeNotifications } from '@models/notification.mapper';
+import { AppNotification } from '@models/notification.model';
 import { combineLatest, distinctUntilChanged, map, Subscription } from 'rxjs';
-import { MatRegistries, MatModules } from './shared/ui/material-modules';
+import { MatRegistries, MatModules } from './core/ui/material-modules';
 
 @Component({
   selector: 'app-root',
@@ -33,7 +33,7 @@ export class App implements OnInit, OnDestroy {
 
   protected readonly isAuthenticated$ = this.store.select(selectIsAuthenticated);
   protected readonly currentUser$ = this.store.select(selectCurrentUser);
-  protected readonly userRole$ = this.store.select(selectUserRole);
+  //protected readonly userRole$ = this.store.select(selectUserRole);
 
   protected notifications: AppNotification[] = [];
   protected showNotificationsDropdown = false;
