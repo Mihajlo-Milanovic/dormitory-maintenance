@@ -1,76 +1,47 @@
 <!--<div class="app-shell">-->
+<nav class="app-nav">
   @if (isAuthenticated$ | async) {
-    <nav>
-      <mat-toolbar class="navbar-container">
-        <a class="navbar-brand-link" routerLink="/">Dorm Maintenance</a>
-        <div class="navbar-actions">
-          <!-- Notification Bell & Dropdown -->
-          <button matIconButton
-            (click)="toggleNotificationsDropdown()"
-            aria-label="Notifications"
-          >
-            @if (unreadCount) {
-              <mat-icon matBadge="{{unreadCount}}">NOTIFICATIONS</mat-icon>
-            } @else {
-              <mat-icon>NOTIFICATIONS</mat-icon>
-            }
-          </button>
+    <mat-toolbar class="app-navbar-container">
 
-<!--          @if (showNotificationsDropdown) {-->
-<!--            <div class="notifications-dropdown">-->
-<!--              <div class="notifications-header">-->
-<!--                <h3 class="notifications-title">Notifications</h3>-->
-<!--                @if (unreadCount > 0) {-->
-<!--                  <button (click)="markAllAsRead()" class="mark-all-btn">-->
-<!--                    Mark all as read-->
-<!--                  </button>-->
-<!--                }-->
-<!--              </div>-->
-
-<!--              <div class="notifications-list">-->
-<!--                @if (notifications.length > 0) {-->
-<!--                  @for (notif of notifications; track notif.id) {-->
-<!--                    <div [class.notification-item&#45;&#45;unread]="!notif.isRead" class="notification-item">-->
-<!--                      <div class="notification-row">-->
-<!--                        <div class="notification-content">-->
-<!--                          <p class="notification-title">{{ notif.title }}</p>-->
-<!--                          <p class="notification-message">{{ notif.message }}</p>-->
-<!--                          <p class="notification-time">{{ notif.createdAt | date:'short' }}</p>-->
-<!--                        </div>-->
-<!--                        @if (!notif.isRead) {-->
-<!--                          <button (click)="markAsRead(notif.id)" class="mark-read-btn">Mark read</button>-->
-<!--                        }-->
-<!--                      </div>-->
-<!--                    </div>-->
-<!--                  }-->
-<!--                } @else {-->
-<!--                  <div class="notifications-empty">-->
-<!--                    No notifications yet.-->
-<!--                  </div>-->
-<!--                }-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          }-->
-          @if (currentUser$ | async; as user) {
-            <div class="user-info">
-              <div class="user-name">{{ user.name }}</div>
-              <mat-card class="user-role-card">
-                  <span class="user-role">{{ user.role }}</span>
-              </mat-card>
-            </div>
+      <a class="navbar-brand-link"
+         routerLink="/"
+      >
+        Dorm Maintenance
+      </a>
+      <div class="navbar-actions">
+        <!-- Notification Bell & Dropdown -->
+        <button matIconButton
+                (click)="toggleNotificationsDropdown()"
+                aria-label="Notifications"
+                class="notification-bell"
+        >
+          @if (unreadCount) {
+            <mat-icon matBadge="{{unreadCount}}">NOTIFICATIONS</mat-icon>
+          } @else {
+            <mat-icon>NOTIFICATIONS</mat-icon>
           }
-          <button matButton="outlined"
-            class="logout-btn"
-            (click)="onLogout()"
-          >
-            Sign out
-          </button>
-        </div>
-      </mat-toolbar>
-    </nav>
-  }
+        </button>
 
-  <main>
-    <router-outlet></router-outlet>
-  </main>
-<!--</div>-->
+
+        @if (currentUser$ | async; as user) {
+          <div class="user-info">
+            <div class="user-name">{{ user.name }}</div>
+            <mat-card class="user-role-card">
+              <span class="user-role">{{ user.role }}</span>
+            </mat-card>
+          </div>
+        }
+        <button matButton="outlined"
+                class="logout-btn"
+                (click)="onLogout()"
+        >
+          Sign out
+        </button>
+      </div>
+    </mat-toolbar>
+  }
+</nav>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
