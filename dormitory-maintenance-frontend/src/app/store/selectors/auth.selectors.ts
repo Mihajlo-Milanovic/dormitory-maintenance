@@ -14,4 +14,9 @@ export const selectUserRole = createSelector(selectCurrentUser, (user) => user?.
 
 export const selectAuthLoading = createSelector(selectAuthState, (state) => state.loading);
 
+export const selectAuthInitialized = createSelector(
+  selectAuthState,
+  (state) => state.initialized,
+);
+
 export const selectAuthError = createSelector(selectAuthState, (state) => state.error);

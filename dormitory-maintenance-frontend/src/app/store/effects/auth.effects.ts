@@ -15,9 +15,9 @@ export class AuthEffects {
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
-      exhaustMap(({ credentials }) =>
+      exhaustMap((credentials) =>
         this.authService.login(credentials).pipe(
-          map((response) => AuthActions.loginSuccess({ user: response.user })),
+          map((response) => AuthActions.loginSuccess(response.user)),
           catchError((error) =>
             of(AuthActions.loginFailure({ error: error.message || 'Login failed' })),
           ),
@@ -30,7 +30,7 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
-        tap(({ user }) => {
+        tap((user) => {
           switch (user.role) {
             case 'admin':
               this.router.navigate(['/admin']);
@@ -75,8 +75,15 @@ export class AuthEffects {
       ofType(AuthActions.loadCurrentUser),
       exhaustMap(() =>
         this.authService.getCurrentUser().pipe(
-          map((user) => AuthActions.loadCurrentUserSuccess({ user })),
-          catchError((error) => of(AuthActions.loadCurrentUserFailure({ error: error.message }))),
+          map((user) => AuthActions.loadCurrentUserSuccess(user)),
+          catchError((error) => {
+            this.authService.setAccessToken(null);
+            return of(
+              AuthActions.loadCurrentUserFailure({
+                error: error.message || 'Failed to load current user',
+              }),
+            );
+          }),
         ),
       ),
     ),

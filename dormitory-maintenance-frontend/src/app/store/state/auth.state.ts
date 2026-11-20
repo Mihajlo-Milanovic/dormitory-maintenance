@@ -4,6 +4,7 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
+  initialized: boolean;
   error: string | null;
 }
 
@@ -11,5 +12,6 @@ export const initialAuthState: AuthState = {
   user: null,
   isAuthenticated: false,
   loading: false,
+  initialized: false,
   error: null,
 };

@@ -5,13 +5,15 @@ import { User } from '@models/user.model';
 export const AuthActions = createActionGroup({
   source: 'Auth',
   events: {
-    Login: props<{ credentials: LoginRequest }>(),
-    LoginSuccess: props<{ user: User }>(),
+    Login: props<LoginRequest>(),
+    LoginSuccess: props<User>(),
     LoginFailure: props<{ error: string }>(),
     Logout: emptyProps(),
     LogoutSuccess: emptyProps(),
+    LogoutFailure: emptyProps(),
     LoadCurrentUser: emptyProps(),
-    LoadCurrentUserSuccess: props<{ user: User }>(),
+    LoadCurrentUserSuccess: props<User>(),
     LoadCurrentUserFailure: props<{ error: string }>(),
+    SessionRestoreFinished: emptyProps(),
   },
 });

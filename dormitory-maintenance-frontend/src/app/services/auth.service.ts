@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, finalize, share, tap } from 'rxjs';
 import { ApiService } from '@services/api.service';
 import { LoginRequest, LoginResponse, RefreshTokenResponse } from '@models/auth.model';
 import { User } from '@models/user.model';
@@ -12,6 +12,11 @@ export class AuthService {
   private accessToken: string | null = null;
   private readonly tokenSubject = new BehaviorSubject<string | null>(null);
   readonly accessToken$ = this.tokenSubject.asObservable();
+
+  // Caches the in-flight refresh call so concurrent 401s (several requests
+  // failing at once) all await the SAME HTTP call instead of each firing
+  // its own 'auth/refresh' request.
+  private refreshInProgress$: Observable<RefreshTokenResponse> | null = null;
 
   constructor() {
     // Restore token from session storage on init if present
@@ -52,11 +57,18 @@ export class AuthService {
   }
 
   refreshToken(): Observable<RefreshTokenResponse> {
-    return this.api.post<RefreshTokenResponse>('auth/refresh', {}).pipe(
-      tap((response) => {
-        this.setAccessToken(response.accessToken);
-      }),
-    );
+    if (!this.refreshInProgress$) {
+      this.refreshInProgress$ = this.api.post<RefreshTokenResponse>('auth/refresh', {}).pipe(
+        tap((response) => {
+          this.setAccessToken(response.accessToken);
+        }),
+        finalize(() => {
+          this.refreshInProgress$ = null;
+        }),
+        share(),
+      );
+    }
+    return this.refreshInProgress$;
   }
 
   getCurrentUser(): Observable<User> {

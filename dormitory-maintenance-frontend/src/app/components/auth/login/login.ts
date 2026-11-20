@@ -34,7 +34,7 @@ export class Login {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
       if (email && password) {
-        this.store.dispatch(AuthActions.login({ credentials: { email, password } }));
+        this.store.dispatch(AuthActions.login({ email, password }));
       }
     }
   }
