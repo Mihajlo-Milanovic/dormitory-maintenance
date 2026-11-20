@@ -4,12 +4,20 @@
 const target = process.env.BACKEND_URL ?? 'http://localhost:3000';
 
 export default {
+  '/api': {
+    target,
+    changeOrigin: true,
+  },
   '/api/**': {
     target,
     changeOrigin: true,
-    pathRewrite: { '^/api': '/api/v1' },
   },
   // Vite requires a glob to match nested Socket.IO transport requests.
+  '/ws': {
+    target,
+    changeOrigin: true,
+    ws: true,
+  },
   '/ws/**': {
     target,
     changeOrigin: true,

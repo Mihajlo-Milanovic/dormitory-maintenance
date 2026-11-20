@@ -75,7 +75,11 @@ export class AuthController {
   ) {
     const refreshToken = request.cookies?.refreshToken;
     await this.authService.logout(refreshToken);
-    response.clearCookie('refreshToken');
+    response.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
     return { success: true };
   }
 

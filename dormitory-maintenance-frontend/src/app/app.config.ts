@@ -31,21 +31,31 @@ export const appConfig: ApplicationConfig = {
       const store = inject(Store);
 
       const token = authService.getAccessToken();
-      if (!token) {
-        store.dispatch(AuthActions.sessionRestoreFinished());
-        return;
+      if (token) {
+        return firstValueFrom(
+          authService.getCurrentUser().pipe(
+            tap((user) => store.dispatch(AuthActions.loadCurrentUserSuccess(user))),
+            catchError((error) => {
+              authService.setAccessToken(null);
+              store.dispatch(
+                AuthActions.loadCurrentUserFailure({
+                  error: error?.message || 'Failed to restore session',
+                }),
+              );
+              return of(null);
+            }),
+          ),
+        );
       }
 
       return firstValueFrom(
-        authService.getCurrentUser().pipe(
-          tap((user) => store.dispatch(AuthActions.loadCurrentUserSuccess(user))),
-          catchError((error) => {
+        authService.refreshToken().pipe(
+          tap((response) =>
+            store.dispatch(AuthActions.loadCurrentUserSuccess(response.user)),
+          ),
+          catchError(() => {
             authService.setAccessToken(null);
-            store.dispatch(
-              AuthActions.loadCurrentUserFailure({
-                error: error?.message || 'Failed to restore session',
-              }),
-            );
+            store.dispatch(AuthActions.sessionRestoreFinished());
             return of(null);
           }),
         ),
